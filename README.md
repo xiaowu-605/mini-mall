@@ -8,6 +8,7 @@
 |------|------|
 | 前端框架 | Vue 3 (Composition API) + TypeScript |
 | 构建工具 | Vite |
+| UI 组件库 | Element Plus（按需引入） |
 | UI 样式 | Less |
 | 状态管理 | Pinia |
 | 后端 | Express.js |
@@ -90,12 +91,7 @@ mini-mall/
 │   ├── router/                # Vue Router 配置
 │   ├── stores/                # Pinia 状态管理
 │   ├── types/                 # TypeScript 类型定义
-│   ├── styles/                # Less 样式
-│   │   ├── index.less          # 入口
-│   │   ├── variables.less      # 变量
-│   │   ├── reset.less          # 重置
-│   │   ├── components/         # 组件样式
-│   │   └── pages/              # 页面样式
+│   ├── styles/                # Less 样式（变量/重置）
 │   ├── App.vue
 │   ├── main.ts
 ├── .husky/                    # Git hooks

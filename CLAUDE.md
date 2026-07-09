@@ -20,13 +20,14 @@ pnpm format:check  # Prettier 检查（pre-commit 钩子自动执行）
 ## 架构
 
 ```
-前端 (Vite + Vue 3)          后端 (Express)
-        |                        |
+前端 (Vite + Vue 3 + Element Plus)          后端 (Express)
+        |                                        |
   src/api/ —— axios ——> /api ——> server/routes/
-        |                        |
-  Pinia stores                   Prisma Client
-        |                        |
-      组件                       SQLite (prisma/dev.db)
+        |                                        |
+  Pinia stores                                   Prisma Client
+        |                                        |
+      组件                                       SQLite (prisma/dev.db)
+  (scoped Less)                                       |
 ```
 
 ### 关键设计决策
@@ -34,7 +35,8 @@ pnpm format:check  # Prettier 检查（pre-commit 钩子自动执行）
 - **前后端同仓库、单 package.json**：`tsconfig.json` 管前端（Vue），`tsconfig.node.json` 管后端（Express/Prisma）
 - **开发时代理**：Vite 开发服务器将 `/api/*` 代理到 `localhost:3000`，无需 CORS 配置
 - **生产部署**：`vite build` 输出到 `dist/`，Express 通过 `express.static('dist')` 托管
-- **Less**：`src/styles/index.less` 为样式入口，通过 `@import` 引入变量/重置/组件/页面样式。Vite 原生支持 Less，`vite.config.ts` 中通过 `additionalData` 自动注入全局变量文件
+- **Less**：样式写在各自 Vue 文件的 `<style lang="less" scoped>` 中，`src/styles/index.less` 仅引入变量和全局重置；`vite.config.ts` 中通过 `additionalData` 自动注入 `variables.less`，所有 scoped 样式块可直接使用全局变量
+- **Element Plus**：按需自动导入，`vite.config.ts` 中配置 `unplugin-vue-components` + `unplugin-auto-import`；组件使用 `el-` 前缀无需手动 import；图标需从 `@element-plus/icons-vue` 显式导入
 
 ### 数据库模型（Prisma + SQLite）
 

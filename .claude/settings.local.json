@@ -9,9 +9,20 @@
       "Bash(npm install *)",
       "Bash(timeout 5 pnpm dev:server)"
     ],
-    "deny": [
-      "Bash(rm -rf *)"
-    ],
-    "autoCompactThreshold": 80
+    "deny": ["Bash(rm -rf *)"],
+    "autoCompactWindow": 800000
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo \"文件已修改，建议检查一下改了什么\""
+          }
+        ]
+      }
+    ]
   }
 }

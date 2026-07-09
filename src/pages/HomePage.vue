@@ -8,7 +8,12 @@
         <div class="relative">
           <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
             <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+              />
             </svg>
           </span>
           <input
@@ -24,7 +29,12 @@
             @click="clearSearch"
           >
             <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M6 18L18 6M6 6l12 12"
+              />
             </svg>
           </button>
         </div>
@@ -41,7 +51,10 @@
               ? 'bg-blue-500 text-white'
               : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200',
           ]"
-          @click="activeCategory = null; page = 1"
+          @click="
+            activeCategory = null
+            page = 1
+          "
         >
           全部
         </button>
@@ -54,7 +67,10 @@
               ? 'bg-blue-500 text-white'
               : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200',
           ]"
-          @click="activeCategory = cat.id; page = 1"
+          @click="
+            activeCategory = cat.id
+            page = 1
+          "
         >
           {{ cat.name }}
         </button>
@@ -68,19 +84,13 @@
 
       <!-- 商品网格 -->
       <div v-else-if="products.length > 0">
-        <div
-          class="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5"
-        >
+        <div class="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
           <ProductCard v-for="product in products" :key="product.id" :product="product" />
         </div>
 
         <!-- 分页 -->
         <div class="mt-8">
-          <Pagination
-            :current-page="page"
-            :total-pages="totalPages"
-            @change="onPageChange"
-          />
+          <Pagination :current-page="page" :total-pages="totalPages" @change="onPageChange" />
         </div>
       </div>
 

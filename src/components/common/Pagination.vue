@@ -14,9 +14,7 @@
       :key="page"
       :class="[
         'rounded-md border px-3 py-1.5 text-sm transition',
-        page === currentPage
-          ? 'border-blue-500 bg-blue-500 text-white'
-          : 'hover:bg-gray-50',
+        page === currentPage ? 'border-blue-500 bg-blue-500 text-white' : 'hover:bg-gray-50',
       ]"
       @click="$emit('change', page)"
     >

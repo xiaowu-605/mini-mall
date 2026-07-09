@@ -16,7 +16,10 @@
       </div>
 
       <!-- 商品不存在 -->
-      <div v-else-if="!product" class="flex flex-col items-center justify-center py-20 text-gray-400">
+      <div
+        v-else-if="!product"
+        class="flex flex-col items-center justify-center py-20 text-gray-400"
+      >
         <span class="text-5xl mb-4">🔍</span>
         <p>商品不存在</p>
       </div>

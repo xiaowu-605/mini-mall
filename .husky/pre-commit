@@ -1,0 +1,1 @@
+npx prettier --check "src/**/*.{vue,ts,css}" "server/**/*.ts"

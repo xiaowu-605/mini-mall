@@ -1,9 +1,9 @@
 allowBuilds:
-  '@prisma/client': set this to true or false
-  '@prisma/engines': set this to true or false
-  esbuild: set this to true or false
-  prisma: set this to true or false
-  vue-demi: set this to true or false
+  '@prisma/client': true
+  '@prisma/engines': true
+  esbuild: true
+  prisma: true
+  vue-demi: true
 minimumReleaseAgeExclude:
   - '@commitlint/cli@21.2.1'
   - '@commitlint/read@21.2.1'

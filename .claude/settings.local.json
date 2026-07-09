@@ -6,7 +6,8 @@
       "Bash(npm*)",
       "Bash(git *)",
       "Bash(node *)",
-      "Bash(npm install *)"
+      "Bash(npm install *)",
+      "Bash(timeout 5 pnpm dev:server)"
     ],
     "deny": [
       "Bash(rm -rf *)"

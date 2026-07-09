@@ -57,19 +57,19 @@
 
 ```bash
 # 安装依赖
-npm install
+pnpm install
 
 # 初始化数据库
-npm run db:push
+pnpm db:push
 
 # 启动开发环境（前端 5173 + 后端 3000）
-npm run dev
+pnpm dev
 
 # 单独启动前端
-npm run dev:frontend
+pnpm dev:frontend
 
 # 单独启动后端
-npm run dev:server
+pnpm dev:server
 ```
 
 ## 项目结构
@@ -103,13 +103,13 @@ mini-mall/
 
 ```bash
 # 同步数据库结构
-npm run db:push
+pnpm db:push
 
 # 生成 Prisma Client
-npm run db:generate
+pnpm db:generate
 
 # 打开可视化工具
-npm run db:studio
+pnpm db:studio
 ```
 
 ## Git 规范

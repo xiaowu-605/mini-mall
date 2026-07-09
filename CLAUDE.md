@@ -5,16 +5,16 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## 常用命令
 
 ```bash
-npm run dev           # 同时启动 Vite (5173) + Express (3000)
-npm run dev:frontend  # 仅前端
-npm run dev:server    # 仅后端（watch 模式）
+pnpm dev           # 同时启动 Vite (5173) + Express (3000)
+pnpm dev:frontend  # 仅前端
+pnpm dev:server    # 仅后端（watch 模式）
 
-npm run db:push       # 同步 Prisma schema → SQLite 数据库
-npm run db:generate   # 重新生成 Prisma Client
-npm run db:studio     # 打开 Prisma Studio 可视化
+pnpm db:push       # 同步 Prisma schema → SQLite 数据库
+pnpm db:generate   # 重新生成 Prisma Client
+pnpm db:studio     # 打开 Prisma Studio 可视化
 
-npm run format        # Prettier 格式化
-npm run format:check  # Prettier 检查（pre-commit 钩子自动执行）
+pnpm format        # Prettier 格式化
+pnpm format:check  # Prettier 检查（pre-commit 钩子自动执行）
 ```
 
 ## 架构

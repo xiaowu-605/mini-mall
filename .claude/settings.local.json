@@ -7,9 +7,19 @@
       "Bash(git *)",
       "Bash(node *)",
       "Bash(npm install *)",
-      "Bash(timeout 5 pnpm dev:server)"
+      "Bash(timeout 5 pnpm dev:server)",
+      "Bash(npx prisma *)",
+      "Bash(npx tsx *)",
+      "Bash(curl -s http://localhost:3000/api/categories)",
+      "Bash(curl -s \"http://localhost:3000/api/products?pageSize=2\")",
+      "Bash(curl -s \"http://localhost:3000/api/products?search=键盘\")",
+      "Bash(curl -s \"http://localhost:3000/api/products/1\")",
+      "Bash(curl -s \"http://localhost:3000/api/products?search=%E9%94%AE%E7%9B%98\")",
+      "WebFetch(domain:github.com)"
     ],
-    "deny": ["Bash(rm -rf *)"],
+    "deny": [
+      "Bash(rm -rf *)"
+    ],
     "autoCompactWindow": 800000
   },
   "hooks": {

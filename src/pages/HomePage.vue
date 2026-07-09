@@ -5,35 +5,15 @@
       <div class="home-page__header-inner">
         <h1 class="home-page__title">Mini-Mall</h1>
         <!-- 搜索框 -->
-        <div class="home-page__search">
-          <span class="home-page__search-icon">
-            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-              />
-            </svg>
-          </span>
-          <input
-            v-model="searchQuery"
-            type="text"
-            placeholder="搜索商品..."
-            class="home-page__search-input"
-            @input="onSearch"
-          />
-          <button v-if="searchQuery" class="home-page__search-clear" @click="clearSearch">
-            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M6 18L18 6M6 6l12 12"
-              />
-            </svg>
-          </button>
-        </div>
+        <el-input
+          v-model="searchQuery"
+          placeholder="搜索商品..."
+          :prefix-icon="Search"
+          clearable
+          size="large"
+          @input="onSearch"
+          @clear="clearSearch"
+        />
       </div>
     </div>
 
@@ -45,7 +25,10 @@
             'home-page__category-btn',
             { 'home-page__category-btn--active': activeCategory === null },
           ]"
-          @click="((activeCategory = null), (page = 1))"
+          @click="
+            activeCategory = null
+            page = 1
+          "
         >
           全部
         </button>
@@ -56,14 +39,17 @@
             'home-page__category-btn',
             { 'home-page__category-btn--active': activeCategory === cat.id },
           ]"
-          @click="((activeCategory = cat.id), (page = 1))"
+          @click="
+            activeCategory = cat.id
+            page = 1
+          "
         >
           {{ cat.name }}
         </button>
       </div>
 
       <!-- 加载中 -->
-      <div v-if="loading" class="home-page__loading"><span>加载中...</span></div>
+      <div v-if="loading" v-loading="loading" class="home-page__loading" />
 
       <!-- 商品网格 -->
       <div v-else-if="products.length > 0">
@@ -77,8 +63,7 @@
 
       <!-- 空状态 -->
       <div v-else class="home-page__empty">
-        <span>📦</span>
-        <p>暂无商品</p>
+        <el-empty description="暂无商品" />
       </div>
     </div>
   </div>
@@ -87,6 +72,7 @@
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { Search } from '@element-plus/icons-vue'
 import { getProducts } from '@/api/products'
 import { getCategories } from '@/api/categories'
 import type { Product, Category } from '@/types'
@@ -206,59 +192,6 @@ onMounted(async () => {
     margin-bottom: @spacing-md;
   }
 
-  &__search {
-    position: relative;
-  }
-
-  &__search-icon {
-    position: absolute;
-    left: 12px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: @color-text-muted;
-    pointer-events: none;
-
-    svg {
-      width: 16px;
-      height: 16px;
-    }
-  }
-
-  &__search-input {
-    width: 100%;
-    border-radius: @radius-lg;
-    border: 1px solid @color-border;
-    padding: 10px 40px;
-    font-size: 14px;
-    outline: none;
-    transition:
-      border-color 0.15s,
-      box-shadow 0.15s;
-
-    &:focus {
-      border-color: @color-primary;
-      box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3);
-    }
-  }
-
-  &__search-clear {
-    position: absolute;
-    right: 12px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: @color-text-muted;
-    padding: 2px;
-
-    &:hover {
-      color: @color-text-secondary;
-    }
-
-    svg {
-      width: 16px;
-      height: 16px;
-    }
-  }
-
   &__body {
     max-width: 1280px;
     margin: 0 auto;
@@ -315,42 +248,11 @@ onMounted(async () => {
   }
 
   &__loading {
-    display: flex;
-    align-items: center;
-    justify-content: center;
     padding: 80px 0;
-    color: @color-text-secondary;
-    gap: @spacing-sm;
-
-    &::before {
-      content: '';
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      border: 4px solid #e5e7eb;
-      border-top-color: @color-primary;
-      animation: spin 0.8s linear infinite;
-    }
   }
 
   &__empty {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 80px 0;
-    color: @color-text-muted;
-
-    span {
-      font-size: 48px;
-      margin-bottom: @spacing-md;
-    }
-  }
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
+    padding: 60px 0;
   }
 }
 </style>

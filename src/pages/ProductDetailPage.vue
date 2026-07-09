@@ -3,11 +3,10 @@
     <div class="product-detail__container">
       <router-link to="/" class="product-detail__back"> ← 返回首页 </router-link>
 
-      <div v-if="loading" class="product-detail__loading"><span>加载中...</span></div>
+      <div v-if="loading" v-loading="loading" class="product-detail__loading" />
 
       <div v-else-if="!product" class="product-detail__not-found">
-        <span>🔍</span>
-        <p>商品不存在</p>
+        <el-empty description="商品不存在" />
       </div>
 
       <template v-else>
@@ -18,9 +17,7 @@
 
           <div class="product-detail__info">
             <div>
-              <span class="product-detail__category-tag">{{
-                product.category?.name || '未分类'
-              }}</span>
+              <el-tag size="small" type="info">{{ product.category?.name || '未分类' }}</el-tag>
               <h1 class="product-detail__name">{{ product.name }}</h1>
             </div>
 
@@ -42,18 +39,22 @@
             </div>
 
             <div class="product-detail__actions">
-              <div class="product-detail__qty">
-                <button :disabled="quantity <= 1" @click="quantity--">−</button>
-                <span>{{ quantity }}</span>
-                <button :disabled="quantity >= product.stock" @click="quantity++">+</button>
-              </div>
-              <button
-                class="product-detail__add-btn"
+              <el-input-number
+                v-model="quantity"
+                :min="1"
+                :max="product.stock"
                 :disabled="product.stock === 0"
+                size="large"
+              />
+              <el-button
+                type="primary"
+                size="large"
+                :disabled="product.stock === 0"
+                class="product-detail__add-btn"
                 @click="addToCart"
               >
                 {{ showCartTip ? '已加入购物车 ✓' : '加入购物车' }}
-              </button>
+              </el-button>
             </div>
           </div>
         </div>
@@ -124,36 +125,11 @@ onMounted(() => {
   }
 
   &__loading {
-    display: flex;
-    align-items: center;
-    justify-content: center;
     padding: 80px 0;
-    color: @color-text-secondary;
-    gap: @spacing-sm;
-
-    &::before {
-      content: '';
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      border: 4px solid #e5e7eb;
-      border-top-color: @color-primary;
-      animation: spin 0.8s linear infinite;
-    }
   }
 
   &__not-found {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
     padding: 80px 0;
-    color: @color-text-muted;
-
-    span {
-      font-size: 48px;
-      margin-bottom: @spacing-md;
-    }
   }
 
   &__card {
@@ -186,16 +162,6 @@ onMounted(() => {
     display: flex;
     flex-direction: column;
     gap: @spacing-md;
-  }
-
-  &__category-tag {
-    display: inline-block;
-    font-size: 12px;
-    color: @color-text-secondary;
-    background: #f3f4f6;
-    padding: 2px 8px;
-    border-radius: @radius-sm;
-    width: fit-content;
   }
 
   &__name {
@@ -279,59 +245,8 @@ onMounted(() => {
     border-top: 1px solid #e5e7eb;
   }
 
-  &__qty {
-    display: flex;
-    align-items: center;
-    border: 1px solid @color-border;
-    border-radius: @radius-lg;
-
-    button {
-      padding: 8px 12px;
-      color: @color-text-secondary;
-      transition: background 0.15s;
-
-      &:hover:not(:disabled) {
-        background: #f3f4f6;
-      }
-
-      &:disabled {
-        opacity: 0.4;
-        cursor: not-allowed;
-      }
-    }
-
-    span {
-      padding: 8px 16px;
-      font-size: 14px;
-      font-weight: 500;
-      min-width: 48px;
-      text-align: center;
-    }
-  }
-
   &__add-btn {
     flex: 1;
-    border-radius: @radius-lg;
-    background: @color-primary;
-    padding: 12px 24px;
-    color: #fff;
-    font-weight: 500;
-    transition: background 0.15s;
-
-    &:hover:not(:disabled) {
-      background: @color-primary-hover;
-    }
-
-    &:disabled {
-      opacity: 0.4;
-      cursor: not-allowed;
-    }
-  }
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
   }
 }
 </style>

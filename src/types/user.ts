@@ -1,0 +1,11 @@
+/** 用户 */
+export interface User {
+  id: number
+  email: string
+  name: string
+  role: 'user' | 'admin'
+  permissions: string[]
+  memberLevel: number
+  totalSpent: number
+  createdAt: string
+}

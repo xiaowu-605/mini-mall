@@ -45,10 +45,7 @@
             'home-page__category-btn',
             { 'home-page__category-btn--active': activeCategory === null },
           ]"
-          @click="
-            activeCategory = null
-            page = 1
-          "
+          @click="((activeCategory = null), (page = 1))"
         >
           全部
         </button>
@@ -59,10 +56,7 @@
             'home-page__category-btn',
             { 'home-page__category-btn--active': activeCategory === cat.id },
           ]"
-          @click="
-            activeCategory = cat.id
-            page = 1
-          "
+          @click="((activeCategory = cat.id), (page = 1))"
         >
           {{ cat.name }}
         </button>

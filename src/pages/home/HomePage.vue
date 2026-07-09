@@ -3,7 +3,6 @@
     <!-- 顶部搜索区 -->
     <div class="home-page__header">
       <div class="home-page__header-inner">
-        <h1 class="home-page__title">Mini-Mall</h1>
         <!-- 搜索框 -->
         <el-input
           v-model="searchQuery"
@@ -25,10 +24,7 @@
             'home-page__category-btn',
             { 'home-page__category-btn--active': activeCategory === null },
           ]"
-          @click="
-            activeCategory = null
-            page = 1
-          "
+          @click="selectCategory(null)"
         >
           全部
         </button>
@@ -39,10 +35,7 @@
             'home-page__category-btn',
             { 'home-page__category-btn--active': activeCategory === cat.id },
           ]"
-          @click="
-            activeCategory = cat.id
-            page = 1
-          "
+          @click="selectCategory(cat.id)"
         >
           {{ cat.name }}
         </button>
@@ -126,6 +119,12 @@ async function loadProducts() {
   }
 }
 
+// 切换分类
+function selectCategory(categoryId: number | null) {
+  activeCategory.value = categoryId
+  page.value = 1
+}
+
 function clearSearch() {
   searchQuery.value = ''
   page.value = 1
@@ -183,13 +182,6 @@ onMounted(async () => {
   &__header-inner {
     max-width: 1280px;
     margin: 0 auto;
-  }
-
-  &__title {
-    font-size: 24px;
-    font-weight: 700;
-    color: @color-text;
-    margin-bottom: @spacing-md;
   }
 
   &__body {

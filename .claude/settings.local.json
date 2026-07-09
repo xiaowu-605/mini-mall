@@ -21,7 +21,20 @@
       "Bash(pnpm format *)",
       "Bash(timeout 10 pnpm dev:frontend)",
       "Bash(pnpm format:check)",
-      "Bash(timeout 8 pnpm dev:frontend)"
+      "Bash(timeout 8 pnpm dev:frontend)",
+      "Bash(curl -s -X POST http://localhost:3000/api/auth/register -H 'Content-Type: application/json' -d '{\"email\":\"test@test.com\",\"password\":\"123456\",\"name\":\"测试用户\"}' -c /tmp/cookies.txt)",
+      "Bash(curl -s http://localhost:3000/api/auth/me -b /tmp/cookies.txt)",
+      "Bash(curl -s -X POST http://localhost:3000/api/auth/register -H 'Content-Type: application/json' -d '{\"email\":\"test@test.com\",\"password\":\"123456\",\"name\":\"重复\"}')",
+      "Bash(curl -s -X POST http://localhost:3000/api/auth/login -H 'Content-Type: application/json' -d '{\"email\":\"test@test.com\",\"password\":\"123456\"}' -c /tmp/cookies2.txt)",
+      "Bash(pkill -f \"tsx.*server\")",
+      "Bash(netstat -ano)",
+      "Bash(taskkill //PID 16476 //F)",
+      "Bash(curl -s -X POST http://localhost:3000/api/auth/login -H 'Content-Type: application/json' -d '{\"email\":\"test@test.com\",\"password\":\"123456\"}')",
+      "Bash(mkdir -p home login register product-detail)",
+      "Bash(mv HomePage.vue home/)",
+      "Bash(mv LoginPage.vue login/)",
+      "Bash(mv RegisterPage.vue register/)",
+      "Bash(mv ProductDetailPage.vue product-detail/)"
     ],
     "deny": [
       "Bash(rm -rf *)"

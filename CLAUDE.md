@@ -34,7 +34,7 @@ pnpm format:check  # Prettier 检查（pre-commit 钩子自动执行）
 - **前后端同仓库、单 package.json**：`tsconfig.json` 管前端（Vue），`tsconfig.node.json` 管后端（Express/Prisma）
 - **开发时代理**：Vite 开发服务器将 `/api/*` 代理到 `localhost:3000`，无需 CORS 配置
 - **生产部署**：`vite build` 输出到 `dist/`，Express 通过 `express.static('dist')` 托管
-- **Tailwind CSS 4**：CSS-first 配置，在 `src/style.css` 通过 `@import "tailwindcss"` 引入，`vite.config.ts` 中使用 `@tailwindcss/vite` 插件。无 `tailwind.config.js`
+- **Less**：`src/styles/index.less` 为样式入口，通过 `@import` 引入变量/重置/组件/页面样式。Vite 原生支持 Less，`vite.config.ts` 中通过 `additionalData` 自动注入全局变量文件
 
 ### 数据库模型（Prisma + SQLite）
 

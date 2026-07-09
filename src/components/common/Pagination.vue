@@ -1,29 +1,23 @@
 <template>
-  <div v-if="totalPages > 1" class="flex items-center justify-center gap-2">
-    <!-- 上一页 -->
+  <div v-if="totalPages > 1" class="pagination">
     <button
+      class="pagination__btn"
       :disabled="currentPage <= 1"
-      class="rounded-md border px-3 py-1.5 text-sm transition disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-50"
       @click="$emit('change', currentPage - 1)"
     >
       上一页
     </button>
-    <!-- 页码 -->
     <button
-      v-for="page in visiblePages"
-      :key="page"
-      :class="[
-        'rounded-md border px-3 py-1.5 text-sm transition',
-        page === currentPage ? 'border-blue-500 bg-blue-500 text-white' : 'hover:bg-gray-50',
-      ]"
-      @click="$emit('change', page)"
+      v-for="p in visiblePages"
+      :key="p"
+      :class="['pagination__btn', { 'pagination__btn--active': p === currentPage }]"
+      @click="$emit('change', p)"
     >
-      {{ page }}
+      {{ p }}
     </button>
-    <!-- 下一页 -->
     <button
+      class="pagination__btn"
       :disabled="currentPage >= totalPages"
-      class="rounded-md border px-3 py-1.5 text-sm transition disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-50"
       @click="$emit('change', currentPage + 1)"
     >
       下一页
@@ -43,7 +37,6 @@ defineEmits<{
   change: [page: number]
 }>()
 
-// 计算可见页码（最多显示 5 个）
 const visiblePages = computed(() => {
   const pages: number[] = []
   const max = 5
@@ -60,3 +53,39 @@ const visiblePages = computed(() => {
   return pages
 })
 </script>
+
+<style lang="less" scoped>
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: @spacing-sm;
+
+  &__btn {
+    border-radius: @radius-md;
+    border: 1px solid @color-border;
+    padding: 6px 12px;
+    font-size: 14px;
+    transition: background 0.15s;
+
+    &:hover:not(:disabled) {
+      background: #f9fafb;
+    }
+
+    &:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    &--active {
+      border-color: @color-primary;
+      background: @color-primary;
+      color: #fff;
+
+      &:hover:not(:disabled) {
+        background: @color-primary-hover;
+      }
+    }
+  }
+}
+</style>

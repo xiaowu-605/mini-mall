@@ -1,13 +1,13 @@
 <template>
-  <div class="min-h-screen bg-gray-50">
+  <div class="home-page">
     <!-- 顶部搜索区 -->
-    <div class="bg-white shadow-sm">
-      <div class="mx-auto max-w-7xl px-4 py-6">
-        <h1 class="text-2xl font-bold text-gray-900 mb-4">Mini-Mall</h1>
+    <div class="home-page__header">
+      <div class="home-page__header-inner">
+        <h1 class="home-page__title">Mini-Mall</h1>
         <!-- 搜索框 -->
-        <div class="relative">
-          <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
-            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div class="home-page__search">
+          <span class="home-page__search-icon">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path
                 stroke-linecap="round"
                 stroke-linejoin="round"
@@ -20,15 +20,11 @@
             v-model="searchQuery"
             type="text"
             placeholder="搜索商品..."
-            class="w-full rounded-lg border border-gray-300 pl-10 pr-10 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            class="home-page__search-input"
             @input="onSearch"
           />
-          <button
-            v-if="searchQuery"
-            class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-            @click="clearSearch"
-          >
-            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <button v-if="searchQuery" class="home-page__search-clear" @click="clearSearch">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path
                 stroke-linecap="round"
                 stroke-linejoin="round"
@@ -41,15 +37,13 @@
       </div>
     </div>
 
-    <div class="mx-auto max-w-7xl px-4 py-6">
+    <div class="home-page__body">
       <!-- 分类标签 -->
-      <div class="mb-6 flex flex-wrap gap-2">
+      <div class="home-page__categories">
         <button
           :class="[
-            'rounded-full px-4 py-1.5 text-sm transition',
-            activeCategory === null
-              ? 'bg-blue-500 text-white'
-              : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200',
+            'home-page__category-btn',
+            { 'home-page__category-btn--active': activeCategory === null },
           ]"
           @click="
             activeCategory = null
@@ -62,10 +56,8 @@
           v-for="cat in categories"
           :key="cat.id"
           :class="[
-            'rounded-full px-4 py-1.5 text-sm transition',
-            activeCategory === cat.id
-              ? 'bg-blue-500 text-white'
-              : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200',
+            'home-page__category-btn',
+            { 'home-page__category-btn--active': activeCategory === cat.id },
           ]"
           @click="
             activeCategory = cat.id
@@ -77,26 +69,21 @@
       </div>
 
       <!-- 加载中 -->
-      <div v-if="loading" class="flex items-center justify-center py-20">
-        <div class="h-8 w-8 animate-spin rounded-full border-4 border-gray-200 border-t-blue-500" />
-        <span class="ml-3 text-gray-500">加载中...</span>
-      </div>
+      <div v-if="loading" class="home-page__loading"><span>加载中...</span></div>
 
       <!-- 商品网格 -->
       <div v-else-if="products.length > 0">
-        <div class="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+        <div class="home-page__grid">
           <ProductCard v-for="product in products" :key="product.id" :product="product" />
         </div>
-
-        <!-- 分页 -->
-        <div class="mt-8">
+        <div class="home-page__pagination">
           <Pagination :current-page="page" :total-pages="totalPages" @change="onPageChange" />
         </div>
       </div>
 
       <!-- 空状态 -->
-      <div v-else class="flex flex-col items-center justify-center py-20 text-gray-400">
-        <span class="text-5xl mb-4">📦</span>
+      <div v-else class="home-page__empty">
+        <span>📦</span>
         <p>暂无商品</p>
       </div>
     </div>
@@ -115,7 +102,6 @@ import Pagination from '@/components/common/Pagination.vue'
 const route = useRoute()
 const router = useRouter()
 
-// 状态
 const products = ref<Product[]>([])
 const categories = ref<Category[]>([])
 const loading = ref(true)
@@ -124,10 +110,8 @@ const totalPages = ref(1)
 const searchQuery = ref('')
 const activeCategory = ref<number | null>(null)
 
-// 防抖定时器
 let debounceTimer: ReturnType<typeof setTimeout>
 
-// 从 URL 恢复状态
 function initFromQuery() {
   const q = route.query
   if (q.search) searchQuery.value = q.search as string
@@ -135,7 +119,6 @@ function initFromQuery() {
   if (q.page) page.value = parseInt(q.page as string) || 1
 }
 
-// 加载分类
 async function loadCategories() {
   try {
     const res = await getCategories()
@@ -145,7 +128,6 @@ async function loadCategories() {
   }
 }
 
-// 加载商品
 async function loadProducts() {
   loading.value = true
   try {
@@ -164,7 +146,6 @@ async function loadProducts() {
   }
 }
 
-// 清除搜索
 function clearSearch() {
   searchQuery.value = ''
   page.value = 1
@@ -172,7 +153,6 @@ function clearSearch() {
   loadProducts()
 }
 
-// 搜索（防抖 300ms）
 function onSearch() {
   clearTimeout(debounceTimer)
   debounceTimer = setTimeout(() => {
@@ -182,7 +162,6 @@ function onSearch() {
   }, 300)
 }
 
-// 翻页
 function onPageChange(newPage: number) {
   page.value = newPage
   updateURL()
@@ -190,7 +169,6 @@ function onPageChange(newPage: number) {
   window.scrollTo({ top: 0, behavior: 'smooth' })
 }
 
-// 同步 URL 参数
 function updateURL() {
   const query: Record<string, string> = {}
   if (searchQuery.value) query.search = searchQuery.value
@@ -199,7 +177,6 @@ function updateURL() {
   router.replace({ query })
 }
 
-// 监听分类变化
 watch(activeCategory, () => {
   updateURL()
   loadProducts()
@@ -211,3 +188,175 @@ onMounted(async () => {
   await loadProducts()
 })
 </script>
+
+<style lang="less" scoped>
+.home-page {
+  min-height: 100vh;
+  background: @color-bg;
+
+  &__header {
+    background: @color-bg-white;
+    box-shadow: @shadow-sm;
+    padding: @spacing-lg @spacing-md;
+  }
+
+  &__header-inner {
+    max-width: 1280px;
+    margin: 0 auto;
+  }
+
+  &__title {
+    font-size: 24px;
+    font-weight: 700;
+    color: @color-text;
+    margin-bottom: @spacing-md;
+  }
+
+  &__search {
+    position: relative;
+  }
+
+  &__search-icon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: @color-text-muted;
+    pointer-events: none;
+
+    svg {
+      width: 16px;
+      height: 16px;
+    }
+  }
+
+  &__search-input {
+    width: 100%;
+    border-radius: @radius-lg;
+    border: 1px solid @color-border;
+    padding: 10px 40px;
+    font-size: 14px;
+    outline: none;
+    transition:
+      border-color 0.15s,
+      box-shadow 0.15s;
+
+    &:focus {
+      border-color: @color-primary;
+      box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3);
+    }
+  }
+
+  &__search-clear {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: @color-text-muted;
+    padding: 2px;
+
+    &:hover {
+      color: @color-text-secondary;
+    }
+
+    svg {
+      width: 16px;
+      height: 16px;
+    }
+  }
+
+  &__body {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: @spacing-lg @spacing-md;
+  }
+
+  &__categories {
+    display: flex;
+    flex-wrap: wrap;
+    gap: @spacing-sm;
+    margin-bottom: @spacing-lg;
+  }
+
+  &__category-btn {
+    border-radius: @radius-full;
+    padding: 6px 16px;
+    font-size: 14px;
+    transition: all 0.15s;
+    background: @color-bg-white;
+    color: @color-text-secondary;
+    border: 1px solid @color-border;
+
+    &:hover {
+      background: #f3f4f6;
+    }
+
+    &--active {
+      background: @color-primary;
+      color: #fff;
+      border-color: @color-primary;
+
+      &:hover {
+        background: @color-primary-hover;
+      }
+    }
+  }
+
+  &__grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: @spacing-md;
+
+    @media (min-width: @screen-sm) {
+      grid-template-columns: repeat(3, 1fr);
+    }
+
+    @media (min-width: @screen-md) {
+      grid-template-columns: repeat(4, 1fr);
+    }
+  }
+
+  &__pagination {
+    margin-top: @spacing-xl;
+  }
+
+  &__loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 80px 0;
+    color: @color-text-secondary;
+    gap: @spacing-sm;
+
+    &::before {
+      content: '';
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      border: 4px solid #e5e7eb;
+      border-top-color: @color-primary;
+      animation: spin 0.8s linear infinite;
+    }
+  }
+
+  &__empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 80px 0;
+    color: @color-text-muted;
+
+    span {
+      font-size: 48px;
+      margin-bottom: @spacing-md;
+    }
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+</style>

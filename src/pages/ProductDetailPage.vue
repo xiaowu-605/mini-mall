@@ -1,99 +1,54 @@
 <template>
-  <div class="min-h-screen bg-gray-50">
-    <div class="mx-auto max-w-4xl px-4 py-6">
-      <!-- 返回 -->
-      <router-link
-        to="/"
-        class="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700 mb-4"
-      >
-        ← 返回首页
-      </router-link>
+  <div class="product-detail">
+    <div class="product-detail__container">
+      <router-link to="/" class="product-detail__back"> ← 返回首页 </router-link>
 
-      <!-- 加载中 -->
-      <div v-if="loading" class="flex items-center justify-center py-20">
-        <div class="h-8 w-8 animate-spin rounded-full border-4 border-gray-200 border-t-blue-500" />
-        <span class="ml-3 text-gray-500">加载中...</span>
-      </div>
+      <div v-if="loading" class="product-detail__loading"><span>加载中...</span></div>
 
-      <!-- 商品不存在 -->
-      <div
-        v-else-if="!product"
-        class="flex flex-col items-center justify-center py-20 text-gray-400"
-      >
-        <span class="text-5xl mb-4">🔍</span>
+      <div v-else-if="!product" class="product-detail__not-found">
+        <span>🔍</span>
         <p>商品不存在</p>
       </div>
 
-      <!-- 商品详情 -->
       <template v-else>
-        <div class="grid gap-6 md:grid-cols-2 bg-white rounded-lg shadow-sm p-6">
-          <!-- 商品图片 -->
-          <div class="aspect-square overflow-hidden rounded-lg bg-gray-100">
-            <img
-              :src="product.image || '/placeholder.svg'"
-              :alt="product.name"
-              class="h-full w-full object-cover"
-            />
+        <div class="product-detail__card">
+          <div class="product-detail__image-wrap">
+            <img :src="product.image || '/placeholder.svg'" :alt="product.name" />
           </div>
 
-          <!-- 商品信息 -->
-          <div class="flex flex-col gap-4">
+          <div class="product-detail__info">
             <div>
-              <span class="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
-                {{ product.category?.name || '未分类' }}
-              </span>
-              <h1 class="mt-2 text-2xl font-bold text-gray-900">{{ product.name }}</h1>
+              <span class="product-detail__category-tag">{{
+                product.category?.name || '未分类'
+              }}</span>
+              <h1 class="product-detail__name">{{ product.name }}</h1>
             </div>
 
-            <div class="flex items-baseline gap-2">
-              <span class="text-3xl font-bold text-red-500">¥{{ product.price }}</span>
-              <span class="text-sm text-gray-400">含税包邮</span>
+            <div class="product-detail__price-row">
+              <span class="price">¥{{ product.price }}</span>
+              <span class="note">含税包邮</span>
             </div>
 
-            <!-- 库存状态 -->
-            <div class="flex items-center gap-2">
-              <span
-                :class="[
-                  'inline-block h-2 w-2 rounded-full',
-                  product.stock > 0 ? 'bg-green-500' : 'bg-red-500',
-                ]"
-              />
-              <span class="text-sm" :class="product.stock > 0 ? 'text-green-600' : 'text-red-500'">
+            <div class="product-detail__stock">
+              <span class="dot" :class="product.stock > 0 ? 'dot--in' : 'dot--out'" />
+              <span class="text" :class="product.stock > 0 ? 'text--in' : 'text--out'">
                 {{ product.stock > 0 ? `有货（库存 ${product.stock} 件）` : '已售罄' }}
               </span>
             </div>
 
-            <!-- 描述 -->
-            <div class="flex-1">
-              <h3 class="text-sm font-medium text-gray-700 mb-2">商品描述</h3>
-              <p class="text-sm text-gray-500 leading-relaxed">
-                {{ product.description || '暂无描述' }}
-              </p>
+            <div class="product-detail__desc">
+              <h3>商品描述</h3>
+              <p>{{ product.description || '暂无描述' }}</p>
             </div>
 
-            <!-- 数量选择 + 加入购物车 -->
-            <div class="flex items-center gap-4 pt-4 border-t">
-              <div class="flex items-center border rounded-lg">
-                <button
-                  class="px-3 py-2 text-gray-600 hover:bg-gray-100 transition disabled:opacity-40"
-                  :disabled="quantity <= 1"
-                  @click="quantity--"
-                >
-                  −
-                </button>
-                <span class="px-4 py-2 text-sm font-medium min-w-[3rem] text-center">
-                  {{ quantity }}
-                </span>
-                <button
-                  class="px-3 py-2 text-gray-600 hover:bg-gray-100 transition disabled:opacity-40"
-                  :disabled="quantity >= product.stock"
-                  @click="quantity++"
-                >
-                  +
-                </button>
+            <div class="product-detail__actions">
+              <div class="product-detail__qty">
+                <button :disabled="quantity <= 1" @click="quantity--">−</button>
+                <span>{{ quantity }}</span>
+                <button :disabled="quantity >= product.stock" @click="quantity++">+</button>
               </div>
               <button
-                class="flex-1 rounded-lg bg-blue-500 px-6 py-3 text-white font-medium transition hover:bg-blue-600 disabled:opacity-40 disabled:cursor-not-allowed"
+                class="product-detail__add-btn"
                 :disabled="product.stock === 0"
                 @click="addToCart"
               >
@@ -133,7 +88,6 @@ async function loadProduct() {
 }
 
 function addToCart() {
-  // TODO: 后续接入购物车 Store
   showCartTip.value = true
   setTimeout(() => {
     showCartTip.value = false
@@ -144,3 +98,240 @@ onMounted(() => {
   loadProduct()
 })
 </script>
+
+<style lang="less" scoped>
+.product-detail {
+  min-height: 100vh;
+  background: @color-bg;
+
+  &__container {
+    max-width: 896px;
+    margin: 0 auto;
+    padding: @spacing-lg @spacing-md;
+  }
+
+  &__back {
+    display: inline-flex;
+    align-items: center;
+    gap: @spacing-xs;
+    font-size: 14px;
+    color: @color-text-secondary;
+    margin-bottom: @spacing-md;
+
+    &:hover {
+      color: @color-text;
+    }
+  }
+
+  &__loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 80px 0;
+    color: @color-text-secondary;
+    gap: @spacing-sm;
+
+    &::before {
+      content: '';
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      border: 4px solid #e5e7eb;
+      border-top-color: @color-primary;
+      animation: spin 0.8s linear infinite;
+    }
+  }
+
+  &__not-found {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 80px 0;
+    color: @color-text-muted;
+
+    span {
+      font-size: 48px;
+      margin-bottom: @spacing-md;
+    }
+  }
+
+  &__card {
+    display: grid;
+    gap: @spacing-lg;
+    background: @color-bg-white;
+    border-radius: @radius-lg;
+    box-shadow: @shadow-sm;
+    padding: @spacing-lg;
+
+    @media (min-width: @screen-md) {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  &__image-wrap {
+    aspect-ratio: 1;
+    overflow: hidden;
+    border-radius: @radius-lg;
+    background: #f3f4f6;
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+  }
+
+  &__info {
+    display: flex;
+    flex-direction: column;
+    gap: @spacing-md;
+  }
+
+  &__category-tag {
+    display: inline-block;
+    font-size: 12px;
+    color: @color-text-secondary;
+    background: #f3f4f6;
+    padding: 2px 8px;
+    border-radius: @radius-sm;
+    width: fit-content;
+  }
+
+  &__name {
+    font-size: 24px;
+    font-weight: 700;
+    color: @color-text;
+    margin-top: @spacing-sm;
+  }
+
+  &__price-row {
+    display: flex;
+    align-items: baseline;
+    gap: @spacing-sm;
+
+    .price {
+      font-size: 30px;
+      font-weight: 700;
+      color: @color-danger;
+    }
+
+    .note {
+      font-size: 14px;
+      color: @color-text-muted;
+    }
+  }
+
+  &__stock {
+    display: flex;
+    align-items: center;
+    gap: @spacing-sm;
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+
+      &--in {
+        background: @color-success;
+      }
+
+      &--out {
+        background: @color-danger;
+      }
+    }
+
+    .text {
+      font-size: 14px;
+
+      &--in {
+        color: #16a34a;
+      }
+
+      &--out {
+        color: @color-danger;
+      }
+    }
+  }
+
+  &__desc {
+    flex: 1;
+
+    h3 {
+      font-size: 14px;
+      font-weight: 500;
+      color: @color-text;
+      margin-bottom: @spacing-sm;
+    }
+
+    p {
+      font-size: 14px;
+      color: @color-text-secondary;
+      line-height: 1.6;
+    }
+  }
+
+  &__actions {
+    display: flex;
+    align-items: center;
+    gap: @spacing-md;
+    padding-top: @spacing-md;
+    border-top: 1px solid #e5e7eb;
+  }
+
+  &__qty {
+    display: flex;
+    align-items: center;
+    border: 1px solid @color-border;
+    border-radius: @radius-lg;
+
+    button {
+      padding: 8px 12px;
+      color: @color-text-secondary;
+      transition: background 0.15s;
+
+      &:hover:not(:disabled) {
+        background: #f3f4f6;
+      }
+
+      &:disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+      }
+    }
+
+    span {
+      padding: 8px 16px;
+      font-size: 14px;
+      font-weight: 500;
+      min-width: 48px;
+      text-align: center;
+    }
+  }
+
+  &__add-btn {
+    flex: 1;
+    border-radius: @radius-lg;
+    background: @color-primary;
+    padding: 12px 24px;
+    color: #fff;
+    font-weight: 500;
+    transition: background 0.15s;
+
+    &:hover:not(:disabled) {
+      background: @color-primary-hover;
+    }
+
+    &:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+</style>

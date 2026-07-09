@@ -8,7 +8,7 @@
 |------|------|
 | 前端框架 | Vue 3 (Composition API) + TypeScript |
 | 构建工具 | Vite |
-| UI 样式 | Tailwind CSS 4 |
+| UI 样式 | Less |
 | 状态管理 | Pinia |
 | 后端 | Express.js |
 | 数据库 | SQLite + Prisma 5 |
@@ -90,9 +90,14 @@ mini-mall/
 │   ├── router/                # Vue Router 配置
 │   ├── stores/                # Pinia 状态管理
 │   ├── types/                 # TypeScript 类型定义
+│   ├── styles/                # Less 样式
+│   │   ├── index.less          # 入口
+│   │   ├── variables.less      # 变量
+│   │   ├── reset.less          # 重置
+│   │   ├── components/         # 组件样式
+│   │   └── pages/              # 页面样式
 │   ├── App.vue
 │   ├── main.ts
-│   └── style.css
 ├── .husky/                    # Git hooks
 ├── package.json
 ├── vite.config.ts

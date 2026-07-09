@@ -15,7 +15,13 @@
       "Bash(curl -s \"http://localhost:3000/api/products?search=键盘\")",
       "Bash(curl -s \"http://localhost:3000/api/products/1\")",
       "Bash(curl -s \"http://localhost:3000/api/products?search=%E9%94%AE%E7%9B%98\")",
-      "WebFetch(domain:github.com)"
+      "WebFetch(domain:github.com)",
+      "Bash(pnpm remove *)",
+      "Bash(pnpm add *)",
+      "Bash(pnpm format *)",
+      "Bash(timeout 10 pnpm dev:frontend)",
+      "Bash(pnpm format:check)",
+      "Bash(timeout 8 pnpm dev:frontend)"
     ],
     "deny": [
       "Bash(rm -rf *)"

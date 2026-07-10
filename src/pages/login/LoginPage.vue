@@ -39,13 +39,14 @@
 
 <script setup lang="ts">
 import { reactive, ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
 import { login } from '@/api/auth'
 import { useAuthStore } from '@/stores/auth'
 
 const router = useRouter()
+const route = useRoute()
 const authStore = useAuthStore()
 const formRef = ref<FormInstance>()
 const loading = ref(false)
@@ -72,7 +73,8 @@ async function onSubmit() {
     await login(form)
     await authStore.fetchUser()
     ElMessage.success('登录成功')
-    router.push('/')
+    const redirect = route.query.redirect as string
+    router.push(redirect || '/')
   } catch (e: any) {
     ElMessage.error(e.response?.data?.error || '登录失败')
   } finally {

@@ -7,11 +7,13 @@ const router = createRouter({
       path: '/',
       name: 'home',
       component: () => import('@/pages/home/HomePage.vue'),
+      meta: { guest: true },
     },
     {
       path: '/products/:id',
       name: 'product-detail',
       component: () => import('@/pages/product-detail/ProductDetailPage.vue'),
+      meta: { guest: true },
     },
     {
       path: '/login',
@@ -44,12 +46,18 @@ const router = createRouter({
 })
 
 // 应用启动时尝试获取当前用户
+let initialAuthDone = false
+
 router.beforeEach(async (to, _from, next) => {
   const { useAuthStore } = await import('@/stores/auth')
   const auth = useAuthStore()
-  if (!auth.user && !auth.loading) {
+
+  // 首次加载时获取用户信息
+  if (!initialAuthDone) {
+    initialAuthDone = true
     await auth.fetchUser()
   }
+
   // 未登录访问需认证的页面，跳转登录页
   if (!auth.user && to.meta.guest !== true) {
     next({ name: 'login', query: { redirect: to.fullPath } })

@@ -48,8 +48,14 @@ export const useCartStore = defineStore('cart', () => {
   /** 修改数量 */
   async function updateQuantity(id: number, params: UpdateCartParams) {
     if (params.quantity === 0) {
+      const backup = items.value
       items.value = items.value.filter((item) => item.id !== id)
-      await removeCartItem(id)
+      try {
+        await removeCartItem(id)
+      } catch {
+        items.value = backup
+        throw new Error('删除失败')
+      }
       return
     }
     const res = await updateCartItem(id, params)
@@ -61,8 +67,14 @@ export const useCartStore = defineStore('cart', () => {
 
   /** 删除购物车项 */
   async function remove(id: number) {
+    const backup = items.value
     items.value = items.value.filter((item) => item.id !== id)
-    await removeCartItem(id)
+    try {
+      await removeCartItem(id)
+    } catch {
+      items.value = backup
+      throw new Error('删除失败')
+    }
   }
 
   return {

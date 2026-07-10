@@ -46,25 +46,30 @@ router.post('/', async (req: Request, res: Response) => {
       return
     }
 
-    // 检查库存，找出缺货商品
-    const insufficient: string[] = []
-    for (const item of cartItems) {
-      if (item.quantity > item.product.stock) {
-        insufficient.push(`${item.product.name}（库存 ${item.product.stock} 件）`)
-      }
-    }
-    if (insufficient.length > 0) {
-      res.status(400).json({ error: `以下商品库存不足：${insufficient.join('、')}` })
-      return
-    }
-
     // 计算金额
     const total = cartItems.reduce((sum, item) => sum + item.product.price * item.quantity, 0)
     const discount = getMemberDiscount(user.memberLevel)
     const discountedTotal = Math.round(total * discount * 100) / 100
 
-    // 事务：创建订单 + 扣减库存 + 清空购物车
+    // 事务：校验库存 + 创建订单 + 扣减库存 + 清空购物车
     const order = await prisma.$transaction(async (tx) => {
+      // 在事务内重新检查库存（防止 TOCTOU 竞态）
+      const insufficient: string[] = []
+      for (const item of cartItems) {
+        const currentProduct = await tx.product.findUnique({
+          where: { id: item.productId },
+          select: { stock: true, name: true },
+        })
+        if (!currentProduct || item.quantity > currentProduct.stock) {
+          insufficient.push(
+            `${currentProduct?.name || '未知商品'}（库存 ${currentProduct?.stock || 0} 件）`,
+          )
+        }
+      }
+      if (insufficient.length > 0) {
+        throw { status: 400, message: `以下商品库存不足：${insufficient.join('、')}` }
+      }
+
       // 创建订单
       const created = await tx.order.create({
         data: {
@@ -101,7 +106,11 @@ router.post('/', async (req: Request, res: Response) => {
     })
 
     res.status(201).json(order)
-  } catch (error) {
+  } catch (error: any) {
+    if (error.status && error.message) {
+      res.status(error.status).json({ error: error.message })
+      return
+    }
     console.error('创建订单失败:', error)
     res.status(500).json({ error: '创建订单失败，请稍后重试' })
   }
@@ -140,8 +149,8 @@ router.get('/:id', async (req: Request, res: Response) => {
       return
     }
 
-    const id = parseInt(req.params.id)
-    if (isNaN(id)) {
+    const id = parseInt(req.params.id, 10)
+    if (Number.isNaN(id)) {
       res.status(400).json({ error: '无效的订单 ID' })
       return
     }
@@ -165,7 +174,7 @@ router.get('/:id', async (req: Request, res: Response) => {
   }
 })
 
-// PUT /api/orders/:id - 模拟支付（PENDING → PAID）
+// PUT /api/orders/:id - 支付/取消
 router.put('/:id', async (req: Request, res: Response) => {
   try {
     const user = await getCurrentUser(req)
@@ -174,8 +183,8 @@ router.put('/:id', async (req: Request, res: Response) => {
       return
     }
 
-    const id = parseInt(req.params.id)
-    if (isNaN(id)) {
+    const id = parseInt(req.params.id, 10)
+    if (Number.isNaN(id)) {
       res.status(400).json({ error: '无效的订单 ID' })
       return
     }
@@ -184,32 +193,36 @@ router.put('/:id', async (req: Request, res: Response) => {
 
     // 模拟支付
     if (action === 'pay') {
-      const order = await prisma.order.findUnique({ where: { id } })
-      if (!order || order.userId !== user.id) {
-        res.status(404).json({ error: '订单不存在' })
-        return
-      }
-      if (order.status !== 'pending') {
-        res.status(400).json({ error: '该订单无法支付' })
-        return
-      }
-
-      // 事务：更新订单状态 + 累加消费金额 + 升级会员
       const updated = await prisma.$transaction(async (tx) => {
+        const order = await tx.order.findUnique({ where: { id } })
+        if (!order || order.userId !== user.id) {
+          throw { status: 404, message: '订单不存在' }
+        }
+        if (order.status !== 'pending') {
+          throw { status: 400, message: '该订单无法支付' }
+        }
+
         const paid = await tx.order.update({
           where: { id },
           data: { status: 'paid' },
           include: { items: { include: { product: true } } },
         })
 
-        // 累加消费并计算新等级
-        const newTotalSpent = user.totalSpent + paid.discountedTotal
+        // 在事务内读取最新的用户数据，防止并发支付时读到过期的 totalSpent
+        const currentUser = await tx.user.findUnique({
+          where: { id: user.id },
+          select: { totalSpent: true, memberLevel: true },
+        })
+
+        const newTotalSpent = (currentUser?.totalSpent || 0) + paid.discountedTotal
         const newLevel = calcMemberLevel(newTotalSpent)
+        const finalLevel = Math.max(currentUser?.memberLevel || 0, newLevel)
+
         await tx.user.update({
           where: { id: user.id },
           data: {
             totalSpent: newTotalSpent,
-            memberLevel: Math.max(user.memberLevel, newLevel),
+            memberLevel: finalLevel,
           },
         })
 
@@ -222,22 +235,21 @@ router.put('/:id', async (req: Request, res: Response) => {
 
     // 取消订单
     if (action === 'cancel') {
-      const order = await prisma.order.findUnique({
-        where: { id },
-        include: { items: true },
-      })
-      if (!order || order.userId !== user.id) {
-        res.status(404).json({ error: '订单不存在' })
-        return
-      }
-      if (order.status === 'cancelled') {
-        res.status(400).json({ error: '订单已取消' })
-        return
-      }
-
-      // 事务：取消订单 + 恢复库存
       await prisma.$transaction(async (tx) => {
+        const order = await tx.order.findUnique({
+          where: { id },
+          include: { items: true },
+        })
+        if (!order || order.userId !== user.id) {
+          throw { status: 404, message: '订单不存在' }
+        }
+        if (order.status === 'cancelled') {
+          throw { status: 400, message: '订单已取消' }
+        }
+
+        // 在事务内先更新状态，防止并发取消重复恢复库存
         await tx.order.update({ where: { id }, data: { status: 'cancelled' } })
+
         for (const item of order.items) {
           await tx.product.update({
             where: { id: item.productId },
@@ -251,7 +263,11 @@ router.put('/:id', async (req: Request, res: Response) => {
     }
 
     res.status(400).json({ error: '无效操作' })
-  } catch (error) {
+  } catch (error: any) {
+    if (error.status && error.message) {
+      res.status(error.status).json({ error: error.message })
+      return
+    }
     console.error('操作订单失败:', error)
     res.status(500).json({ error: '操作订单失败' })
   }

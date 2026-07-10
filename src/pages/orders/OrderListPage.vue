@@ -42,33 +42,11 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { getMyOrders } from '@/api/orders'
+import { statusLabel, statusType } from '@/utils/order'
 import type { Order } from '@/types'
 
 const orders = ref<Order[]>([])
 const loading = ref(true)
-
-// 订单状态映射
-function statusLabel(status: string): string {
-  const map: Record<string, string> = {
-    pending: '待付款',
-    paid: '已支付',
-    shipped: '已发货',
-    completed: '已完成',
-    cancelled: '已取消',
-  }
-  return map[status] || status
-}
-
-function statusType(status: string): '' | 'success' | 'warning' | 'info' | 'danger' {
-  const map: Record<string, '' | 'success' | 'warning' | 'info' | 'danger'> = {
-    pending: 'warning',
-    paid: 'success',
-    shipped: '',
-    completed: '',
-    cancelled: 'info',
-  }
-  return map[status] || 'info'
-}
 
 function formatTime(iso: string): string {
   return new Date(iso).toLocaleString('zh-CN')

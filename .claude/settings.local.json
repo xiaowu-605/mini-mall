@@ -34,7 +34,14 @@
       "Bash(mv HomePage.vue home/)",
       "Bash(mv LoginPage.vue login/)",
       "Bash(mv RegisterPage.vue register/)",
-      "Bash(mv ProductDetailPage.vue product-detail/)"
+      "Bash(mv ProductDetailPage.vue product-detail/)",
+      "Bash(gh pr *)",
+      "Bash(winget install *)",
+      "Bash(gh auth *)",
+      "Bash(npx vue-tsc *)",
+      "Bash(npx prettier *)",
+      "Bash(taskkill //PID 4908 //F)",
+      "Bash(curl -s -X POST http://localhost:3000/api/orders -H \"Content-Type: application/json\" -d '{}')"
     ],
     "deny": [
       "Bash(rm -rf *)"

@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "dev": "concurrently \"vite\" \"tsx server/index.ts\"",
+    "dev": "concurrently \"vite\" \"tsx watch server/index.ts\"",
     "dev:frontend": "vite",
     "dev:server": "tsx watch server/index.ts",
     "build": "vue-tsc -b && vite build",

@@ -65,11 +65,17 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
+import { ElMessage } from 'element-plus'
 import { getProductById } from '@/api/products'
+import { useAuthStore } from '@/stores/auth'
+import { useCartStore } from '@/stores/cart'
 import type { Product } from '@/types'
 
 const route = useRoute()
+const router = useRouter()
+const auth = useAuthStore()
+const cart = useCartStore()
 const product = ref<Product | null>(null)
 const loading = ref(true)
 const quantity = ref(1)
@@ -88,11 +94,21 @@ async function loadProduct() {
   }
 }
 
-function addToCart() {
-  showCartTip.value = true
-  setTimeout(() => {
-    showCartTip.value = false
-  }, 1500)
+async function addToCart() {
+  if (!auth.isLoggedIn) {
+    router.push({ name: 'login', query: { redirect: route.fullPath } })
+    return
+  }
+  if (!product.value) return
+  try {
+    await cart.add({ productId: product.value.id, quantity: quantity.value })
+    showCartTip.value = true
+    setTimeout(() => {
+      showCartTip.value = false
+    }, 1500)
+  } catch (e: any) {
+    ElMessage.error(e.response?.data?.error || '加入购物车失败')
+  }
 }
 
 onMounted(() => {

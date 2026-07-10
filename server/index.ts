@@ -6,6 +6,8 @@ import { fileURLToPath } from 'url'
 import productsRouter from './routes/products'
 import categoriesRouter from './routes/categories'
 import authRouter from './routes/auth'
+import cartRouter from './routes/cart'
+import ordersRouter from './routes/orders'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -21,6 +23,8 @@ app.use(cookieParser())
 app.use('/api/products', productsRouter)
 app.use('/api/categories', categoriesRouter)
 app.use('/api/auth', authRouter)
+app.use('/api/cart', cartRouter)
+app.use('/api/orders', ordersRouter)
 
 // Production: serve static frontend files
 if (process.env.NODE_ENV === 'production') {

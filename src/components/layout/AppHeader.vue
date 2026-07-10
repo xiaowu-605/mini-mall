@@ -9,6 +9,11 @@
         <router-link to="/cart" class="app-header__link">
           <el-icon><ShoppingCart /></el-icon>
           <span>购物车</span>
+          <el-badge
+            v-if="auth.isLoggedIn && cart.count > 0"
+            :value="cart.count"
+            class="app-header__badge"
+          />
         </router-link>
 
         <router-link to="/orders" class="app-header__link">
@@ -48,12 +53,26 @@
 
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
+import { watch } from 'vue'
 import { ShoppingCart, Tickets, User, UserFilled, ArrowDown } from '@element-plus/icons-vue'
 import { useAuthStore } from '@/stores/auth'
+import { useCartStore } from '@/stores/cart'
 import { ElMessage } from 'element-plus'
 
 const router = useRouter()
 const auth = useAuthStore()
+const cart = useCartStore()
+
+// 登录后自动获取购物车数量
+watch(
+  () => auth.isLoggedIn,
+  (loggedIn) => {
+    if (loggedIn) {
+      cart.fetchCart()
+    }
+  },
+  { immediate: true },
+)
 
 function onCommand(cmd: string) {
   if (cmd === 'orders') {

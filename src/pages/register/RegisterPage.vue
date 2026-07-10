@@ -100,7 +100,8 @@ async function onSubmit() {
 
   loading.value = true
   try {
-    await register({ email: form.email, password: form.password, name: form.name })
+    const registerData = { email: form.email, password: form.password, name: form.name }
+    await register(registerData)
     await authStore.fetchUser()
     ElMessage.success('注册成功')
     router.push('/')

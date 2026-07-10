@@ -104,12 +104,13 @@ async function loadCategories() {
 async function loadProducts() {
   loading.value = true
   try {
-    const res = await getProducts({
+    const productParams = {
       search: searchQuery.value || undefined,
       categoryId: activeCategory.value ?? undefined,
       page: page.value,
       pageSize: 9,
-    })
+    }
+    const res = await getProducts(productParams)
     products.value = res.data.data
     totalPages.value = res.data.totalPages
   } catch (e) {

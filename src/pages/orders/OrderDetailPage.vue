@@ -101,7 +101,8 @@ async function loadOrder() {
 async function doPay() {
   if (!order.value) return
   try {
-    const res = await updateOrder(order.value.id, { action: 'pay' })
+    const payParams = { action: 'pay' as const }
+    const res = await updateOrder(order.value.id, payParams)
     order.value = res.data
     ElMessage.success('支付成功')
     // 刷新购物车（因为清空了）
@@ -114,7 +115,8 @@ async function doPay() {
 async function doCancel() {
   if (!order.value) return
   try {
-    await updateOrder(order.value.id, { action: 'cancel' })
+    const cancelParams = { action: 'cancel' as const }
+    await updateOrder(order.value.id, cancelParams)
     ElMessage.success('订单已取消')
     router.push('/orders')
   } catch (e: any) {

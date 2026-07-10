@@ -8,6 +8,9 @@ import categoriesRouter from './routes/categories'
 import authRouter from './routes/auth'
 import cartRouter from './routes/cart'
 import ordersRouter from './routes/orders'
+import adminProductsRouter from './routes/admin-products'
+import adminOrdersRouter from './routes/admin-orders'
+import adminCategoriesRouter from './routes/admin-categories'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -25,6 +28,9 @@ app.use('/api/categories', categoriesRouter)
 app.use('/api/auth', authRouter)
 app.use('/api/cart', cartRouter)
 app.use('/api/orders', ordersRouter)
+app.use('/api/admin/products', adminProductsRouter)
+app.use('/api/admin/orders', adminOrdersRouter)
+app.use('/api/admin/categories', adminCategoriesRouter)
 
 // Production: serve static frontend files
 if (process.env.NODE_ENV === 'production') {

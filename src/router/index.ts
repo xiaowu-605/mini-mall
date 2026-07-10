@@ -42,25 +42,58 @@ const router = createRouter({
       name: 'order-detail',
       component: () => import('@/pages/orders/OrderDetailPage.vue'),
     },
+    {
+      path: '/admin',
+      component: () => import('@/pages/admin/AdminLayout.vue'),
+      meta: { requiresAdmin: true },
+      children: [
+        { path: '', redirect: '/admin/products' },
+        {
+          path: 'products',
+          name: 'admin-products',
+          component: () => import('@/pages/admin/ProductManage.vue'),
+        },
+        {
+          path: 'orders',
+          name: 'admin-orders',
+          component: () => import('@/pages/admin/OrderManage.vue'),
+        },
+        {
+          path: 'categories',
+          name: 'admin-categories',
+          component: () => import('@/pages/admin/CategoryManage.vue'),
+        },
+      ],
+    },
   ],
 })
 
 // 应用启动时尝试获取当前用户
 let initialAuthDone = false
+let hadUser = false
 
 router.beforeEach(async (to, _from, next) => {
   const { useAuthStore } = await import('@/stores/auth')
   const auth = useAuthStore()
 
-  // 首次加载时获取用户信息
-  if (!initialAuthDone) {
+  // 首次加载时获取，或者之前登录过但被 401 清空后重试
+  const needFetch = !initialAuthDone || (hadUser && !auth.user)
+  if (needFetch) {
     initialAuthDone = true
     await auth.fetchUser()
+    if (auth.user) {
+      hadUser = true
+    }
   }
 
   // 未登录访问需认证的页面，跳转登录页
   if (!auth.user && to.meta.guest !== true) {
     next({ name: 'login', query: { redirect: to.fullPath } })
+    return
+  }
+  // 非 admin 访问后台页面，跳转首页
+  if (to.meta.requiresAdmin && !auth.isAdmin) {
+    next('/')
     return
   }
   next()

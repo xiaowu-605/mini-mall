@@ -1,17 +1,36 @@
 import { PrismaClient } from '@prisma/client'
+import bcrypt from 'bcryptjs'
 
 const prisma = new PrismaClient()
 
 async function main() {
   console.log('开始填充种子数据...')
 
-  // 创建分类
-  const categories = await Promise.all([
-    prisma.category.create({ data: { name: '数码产品' } }),
-    prisma.category.create({ data: { name: '服装鞋帽' } }),
-    prisma.category.create({ data: { name: '图书音像' } }),
-    prisma.category.create({ data: { name: '家居生活' } }),
-  ])
+  // 创建管理员
+  const admin = await prisma.user.upsert({
+    where: { email: 'admin@mini-mall.com' },
+    update: {},
+    create: {
+      email: 'admin@mini-mall.com',
+      password: await bcrypt.hash('admin123', 10),
+      name: '管理员',
+      role: 'admin',
+      permissions: JSON.stringify(['super_admin']),
+    },
+  })
+  console.log(`管理员账号: ${admin.email} / admin123`)
+
+  // 创建分类（upsert 避免重复执行报错）
+  const categoryNames = ['数码产品', '服装鞋帽', '图书音像', '家居生活']
+  const categories = []
+  for (const name of categoryNames) {
+    const cat = await prisma.category.upsert({
+      where: { name },
+      update: {},
+      create: { name },
+    })
+    categories.push(cat)
+  }
 
   console.log(`创建了 ${categories.length} 个分类`)
 
@@ -40,6 +59,11 @@ async function main() {
     { name: '真空保温杯 500ml', description: '316不锈钢内胆，12小时保温，食品级硅胶密封圈。', price: 89, stock: 400, categoryId: categories[3].id },
     { name: '记忆棉坐垫 办公室靠垫', description: '慢回弹记忆棉，减压护腰，可拆洗外套，防滑底。', price: 119, stock: 150, categoryId: categories[3].id },
   ]
+
+  // 清理旧数据（按依赖顺序）
+  await prisma.orderItem.deleteMany()
+  await prisma.cartItem.deleteMany()
+  await prisma.product.deleteMany()
 
   for (const p of products) {
     await prisma.product.create({

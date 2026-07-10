@@ -16,10 +16,8 @@ export const useAuthStore = defineStore('auth', () => {
   // 是否有某项权限（super_admin 拥有所有权限）
   function hasPermission(perm: string): boolean {
     if (!user.value) return false
-    const perms: string[] =
-      typeof user.value.permissions === 'string'
-        ? JSON.parse(user.value.permissions)
-        : user.value.permissions
+    const raw = user.value.permissions
+    const perms: string[] = raw ? (typeof raw === 'string' ? JSON.parse(raw) : raw) : []
     if (perms.includes('super_admin')) return true
     return perms.includes(perm)
   }

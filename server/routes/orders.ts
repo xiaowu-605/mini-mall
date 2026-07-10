@@ -30,7 +30,7 @@ router.post('/', async (req: Request, res: Response) => {
     }
 
     const { address, phone } = req.body
-    if (!address || !phone) {
+    if (!address?.trim() || !phone?.trim()) {
       res.status(400).json({ error: '请填写收货地址和联系电话' })
       return
     }
@@ -243,8 +243,8 @@ router.put('/:id', async (req: Request, res: Response) => {
         if (!order || order.userId !== user.id) {
           throw { status: 404, message: '订单不存在' }
         }
-        if (order.status === 'cancelled') {
-          throw { status: 400, message: '订单已取消' }
+        if (order.status !== 'pending') {
+          throw { status: 400, message: '该订单无法取消' }
         }
 
         // 在事务内先更新状态，防止并发取消重复恢复库存

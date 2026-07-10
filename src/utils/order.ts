@@ -19,5 +19,5 @@ export function statusType(status: string): '' | 'success' | 'warning' | 'info' 
     completed: '',
     cancelled: 'info',
   }
-  return map[status] || 'info'
+  return map[status] ?? 'info'
 }

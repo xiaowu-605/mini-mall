@@ -15,7 +15,7 @@ api.interceptors.response.use(
       // 动态 import 避免循环依赖
       import('@/stores/auth').then(({ useAuthStore }) => {
         const auth = useAuthStore()
-        auth.logout()
+        auth.logout().catch(() => {})
       })
     }
     return Promise.reject(error)

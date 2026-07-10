@@ -29,7 +29,7 @@ router.post('/', async (req: Request, res: Response) => {
       res.status(400).json({ error: '请输入商品名称' })
       return
     }
-    if (price == null || price === '' || isNaN(parseFloat(price))) {
+    if (price == null || price === '' || isNaN(parseFloat(price)) || !isFinite(Number(price))) {
       res.status(400).json({ error: '请输入有效价格' })
       return
     }
@@ -52,7 +52,7 @@ router.post('/', async (req: Request, res: Response) => {
         description: description || '',
         price: parseFloat(price),
         image: image || null,
-        stock: parseInt(stock) || 0,
+        stock: Math.max(0, parseInt(stock) || 0),
         categoryId: parsedCategoryId,
       },
       include: { category: true },
@@ -87,7 +87,7 @@ router.put('/:id', async (req: Request, res: Response) => {
     }
     if (description !== undefined) data.description = description
     if (price !== undefined) {
-      if (price === '' || isNaN(parseFloat(price))) {
+      if (price === '' || isNaN(parseFloat(price)) || !isFinite(Number(price))) {
         res.status(400).json({ error: '请输入有效价格' })
         return
       }

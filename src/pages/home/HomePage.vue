@@ -44,6 +44,13 @@
       <!-- 加载中 -->
       <div v-if="loading" v-loading="loading" class="home-page__loading" />
 
+      <!-- 加载失败 -->
+      <div v-else-if="error" class="home-page__error">
+        <el-empty description="加载失败，请重试">
+          <el-button type="primary" @click="loadProducts">重新加载</el-button>
+        </el-empty>
+      </div>
+
       <!-- 商品网格 -->
       <div v-else-if="products.length > 0">
         <div class="home-page__grid">
@@ -78,6 +85,7 @@ const router = useRouter()
 const products = ref<Product[]>([])
 const categories = ref<Category[]>([])
 const loading = ref(true)
+const error = ref(false)
 const page = ref(1)
 const totalPages = ref(1)
 const searchQuery = ref('')
@@ -103,6 +111,7 @@ async function loadCategories() {
 
 async function loadProducts() {
   loading.value = true
+  error.value = false
   try {
     const productParams = {
       search: searchQuery.value || undefined,
@@ -115,6 +124,7 @@ async function loadProducts() {
     totalPages.value = res.data.totalPages
   } catch (e) {
     console.error('加载商品失败:', e)
+    error.value = true
   } finally {
     loading.value = false
   }
@@ -122,11 +132,13 @@ async function loadProducts() {
 
 // 切换分类
 function selectCategory(categoryId: number | null) {
+  clearTimeout(debounceTimer)
   activeCategory.value = categoryId
   page.value = 1
 }
 
 function clearSearch() {
+  clearTimeout(debounceTimer)
   searchQuery.value = ''
   page.value = 1
   updateURL()
@@ -157,7 +169,10 @@ function updateURL() {
   router.replace({ query })
 }
 
+let initialLoadDone = false
+
 watch(activeCategory, () => {
+  if (!initialLoadDone) return
   updateURL()
   loadProducts()
 })
@@ -165,6 +180,7 @@ watch(activeCategory, () => {
 onMounted(async () => {
   initFromQuery()
   await loadCategories()
+  initialLoadDone = true
   await loadProducts()
 })
 </script>

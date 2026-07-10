@@ -20,7 +20,10 @@ router.get('/', async (req: Request, res: Response) => {
     }
 
     if (categoryId) {
-      where.categoryId = parseInt(categoryId as string)
+      const parsed = parseInt(categoryId as string)
+      if (!Number.isNaN(parsed)) {
+        where.categoryId = parsed
+      }
     }
 
     const [products, total] = await Promise.all([

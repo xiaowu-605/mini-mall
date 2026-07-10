@@ -6,6 +6,11 @@
       <!-- 加载中 -->
       <div v-if="loading" v-loading="loading" class="order-list__loading" />
 
+      <!-- 加载失败 -->
+      <el-empty v-else-if="error" description="加载失败，请重试">
+        <el-button type="primary" @click="loadOrders">重新加载</el-button>
+      </el-empty>
+
       <!-- 空状态 -->
       <el-empty v-else-if="orders.length === 0" description="暂无订单" />
 
@@ -47,6 +52,7 @@ import type { Order } from '@/types'
 
 const orders = ref<Order[]>([])
 const loading = ref(true)
+const error = ref(false)
 
 function formatTime(iso: string): string {
   return new Date(iso).toLocaleString('zh-CN')
@@ -54,11 +60,13 @@ function formatTime(iso: string): string {
 
 async function loadOrders() {
   loading.value = true
+  error.value = false
   try {
     const res = await getMyOrders()
     orders.value = res.data
   } catch (e) {
     console.error('加载订单失败:', e)
+    error.value = true
   } finally {
     loading.value = false
   }

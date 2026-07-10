@@ -5,8 +5,14 @@
 
       <div v-if="loading" v-loading="loading" class="product-detail__loading" />
 
-      <div v-else-if="!product" class="product-detail__not-found">
+      <div v-else-if="notFound" class="product-detail__not-found">
         <el-empty description="商品不存在" />
+      </div>
+
+      <div v-else-if="!product" class="product-detail__not-found">
+        <el-empty description="加载失败，请重试">
+          <el-button type="primary" @click="loadProduct">重新加载</el-button>
+        </el-empty>
       </div>
 
       <template v-else>
@@ -78,17 +84,26 @@ const auth = useAuthStore()
 const cart = useCartStore()
 const product = ref<Product | null>(null)
 const loading = ref(true)
+const notFound = ref(false)
 const quantity = ref(1)
 const showCartTip = ref(false)
 
 async function loadProduct() {
   loading.value = true
+  notFound.value = false
   try {
     const id = parseInt(route.params.id as string)
+    if (Number.isNaN(id)) {
+      notFound.value = true
+      return
+    }
     const res = await getProductById(id)
     product.value = res.data
-  } catch (e) {
+  } catch (e: any) {
     console.error('加载商品详情失败:', e)
+    if (e.response?.status === 404) {
+      notFound.value = true
+    }
   } finally {
     loading.value = false
   }

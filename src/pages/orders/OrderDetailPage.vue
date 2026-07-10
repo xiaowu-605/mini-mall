@@ -5,8 +5,14 @@
 
       <div v-if="loading" v-loading="loading" class="order-detail__loading" />
 
-      <div v-else-if="!order" class="order-detail__empty">
+      <div v-else-if="notFound" class="order-detail__empty">
         <el-empty description="订单不存在" />
+      </div>
+
+      <div v-else-if="!order" class="order-detail__empty">
+        <el-empty description="加载失败，请重试">
+          <el-button type="primary" @click="loadOrder">重新加载</el-button>
+        </el-empty>
       </div>
 
       <template v-else>
@@ -84,15 +90,24 @@ const router = useRouter()
 const cart = useCartStore()
 const order = ref<Order | null>(null)
 const loading = ref(true)
+const notFound = ref(false)
 
 async function loadOrder() {
   loading.value = true
+  notFound.value = false
   try {
     const id = parseInt(route.params.id as string)
+    if (Number.isNaN(id)) {
+      notFound.value = true
+      return
+    }
     const res = await getOrderById(id)
     order.value = res.data
-  } catch (e) {
+  } catch (e: any) {
     console.error('加载订单失败:', e)
+    if (e.response?.status === 404) {
+      notFound.value = true
+    }
   } finally {
     loading.value = false
   }

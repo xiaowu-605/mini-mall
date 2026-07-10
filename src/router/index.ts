@@ -71,18 +71,22 @@ const router = createRouter({
 // 应用启动时尝试获取当前用户
 let initialAuthDone = false
 let hadUser = false
+let fetchFailCount = 0
 
 router.beforeEach(async (to, _from, next) => {
   const { useAuthStore } = await import('@/stores/auth')
   const auth = useAuthStore()
 
-  // 首次加载时获取，或者之前登录过但被 401 清空后重试
-  const needFetch = !initialAuthDone || (hadUser && !auth.user)
+  // 首次加载时获取，之前登录过但被 401 清空后重试，或短暂失败后重试
+  const needFetch = !initialAuthDone || (!auth.user && (hadUser || fetchFailCount < 3))
   if (needFetch) {
     initialAuthDone = true
     await auth.fetchUser()
     if (auth.user) {
       hadUser = true
+      fetchFailCount = 0
+    } else if (!hadUser) {
+      fetchFailCount++
     }
   }
 

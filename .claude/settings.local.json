@@ -43,7 +43,8 @@
       "Bash(taskkill //PID 4908 //F)",
       "Bash(curl -s -X POST http://localhost:3000/api/orders -H \"Content-Type: application/json\" -d '{}')",
       "Bash(taskkill //PID 25316 //F)",
-      "Bash(npx tsc *)"
+      "Bash(npx tsc *)",
+      "Bash(npx vite *)"
     ],
     "deny": [
       "Bash(rm -rf *)"

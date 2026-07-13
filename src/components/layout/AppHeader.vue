@@ -63,7 +63,7 @@ const router = useRouter()
 const auth = useAuthStore()
 const cart = useCartStore()
 
-// 登录后自动获取购物车数量
+/** 登录后自动获取购物车数量 */
 watch(
   () => auth.isLoggedIn,
   (loggedIn) => {
@@ -74,6 +74,7 @@ watch(
   { immediate: true },
 )
 
+/** 处理下拉菜单命令 */
 function onCommand(cmd: string) {
   if (cmd === 'orders') {
     router.push('/orders')

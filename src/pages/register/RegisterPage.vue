@@ -70,6 +70,7 @@ const form = reactive({
   confirmPassword: '',
 })
 
+/** 验证两次密码一致 */
 const validateConfirm = (_rule: any, value: string, callback: Function) => {
   if (value !== form.password) {
     callback(new Error('两次输入的密码不一致'))
@@ -94,6 +95,7 @@ const rules: FormRules = {
   ],
 }
 
+/** 提交注册 */
 async function onSubmit() {
   const valid = await formRef.value?.validate().catch(() => false)
   if (!valid) return

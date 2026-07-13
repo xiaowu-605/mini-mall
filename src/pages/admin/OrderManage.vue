@@ -47,27 +47,25 @@ import { ref, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { getAdminOrders, updateAdminOrderStatus } from '@/api/admin'
 import { statusLabel, statusType } from '@/utils/order'
+import { formatTime } from '@/utils/format'
+import { useAsyncData } from '@/hooks/useAsyncData'
 import type { Order } from '@/types'
 
 const orders = ref<Order[]>([])
-const loading = ref(false)
+const { loading, run } = useAsyncData()
 
-function formatTime(iso: string): string {
-  return new Date(iso).toLocaleString('zh-CN')
-}
+/** 页面初始化：加载订单列表 */
+onMounted(() => {
+  loadOrders()
+})
 
+/** 加载订单列表 */
 async function loadOrders() {
-  loading.value = true
-  try {
-    const res = await getAdminOrders()
-    orders.value = res.data
-  } catch (e) {
-    console.error('加载订单失败:', e)
-  } finally {
-    loading.value = false
-  }
+  const res = await run(() => getAdminOrders())
+  if (res) orders.value = res.data
 }
 
+/** 更新订单状态 */
 async function doChangeStatus(orderId: number, status: string) {
   const orderParams = { status }
   try {
@@ -78,10 +76,6 @@ async function doChangeStatus(orderId: number, status: string) {
     ElMessage.error(e.response?.data?.error || '更新失败')
   }
 }
-
-onMounted(() => {
-  loadOrders()
-})
 </script>
 
 <style lang="less" scoped>

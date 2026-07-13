@@ -88,6 +88,12 @@ const notFound = ref(false)
 const quantity = ref(1)
 const showCartTip = ref(false)
 
+/** 页面初始化：加载商品详情 */
+onMounted(() => {
+  loadProduct()
+})
+
+/** 加载商品详情 */
 async function loadProduct() {
   loading.value = true
   notFound.value = false
@@ -109,6 +115,7 @@ async function loadProduct() {
   }
 }
 
+/** 加入购物车 */
 async function addToCart() {
   if (!auth.isLoggedIn) {
     router.push({ name: 'login', query: { redirect: route.fullPath } })
@@ -116,7 +123,8 @@ async function addToCart() {
   }
   if (!product.value) return
   try {
-    await cart.add({ productId: product.value.id, quantity: quantity.value })
+    const addParams = { productId: product.value.id, quantity: quantity.value }
+    await cart.add(addParams)
     showCartTip.value = true
     setTimeout(() => {
       showCartTip.value = false
@@ -125,10 +133,6 @@ async function addToCart() {
     ElMessage.error(e.response?.data?.error || '加入购物车失败')
   }
 }
-
-onMounted(() => {
-  loadProduct()
-})
 </script>
 
 <style lang="less" scoped>

@@ -31,15 +31,23 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { ElMessage } from 'element-plus'
 import { getAdminCategories, createAdminCategory, deleteAdminCategory } from '@/api/admin'
+import { useDeleteConfirm } from '@/hooks/useDeleteConfirm'
 
+const { confirm: confirmDelete } = useDeleteConfirm()
 const categories = ref<any[]>([])
 const loading = ref(false)
 const dialogVisible = ref(false)
 const submitting = ref(false)
 const newName = ref('')
 
+/** 页面初始化：加载分类列表 */
+onMounted(() => {
+  loadCategories()
+})
+
+/** 加载分类列表 */
 async function loadCategories() {
   loading.value = true
   try {
@@ -52,11 +60,13 @@ async function loadCategories() {
   }
 }
 
+/** 打开新增分类弹窗 */
 function openAddDialog() {
   newName.value = ''
   dialogVisible.value = true
 }
 
+/** 新增分类 */
 async function doCreate() {
   if (!newName.value.trim()) {
     ElMessage.warning('请输入分类名称')
@@ -76,30 +86,14 @@ async function doCreate() {
   }
 }
 
+/** 删除分类 */
 async function doDelete(id: number, name: string) {
-  try {
-    await ElMessageBox.confirm(`确认删除分类「${name}」？`, '删除确认', {
-      type: 'warning',
-      confirmButtonText: '删除',
-      cancelButtonText: '取消',
-    })
-  } catch {
-    // 用户取消对话框
-    return
-  }
-
-  try {
-    await deleteAdminCategory(id)
-    ElMessage.success('已删除')
-    await loadCategories()
-  } catch (e: any) {
-    ElMessage.error(e.response?.data?.error || '删除失败')
-  }
+  await confirmDelete({
+    message: `确认删除分类「${name}」？`,
+    onDelete: () => deleteAdminCategory(id),
+    onSuccess: loadCategories,
+  })
 }
-
-onMounted(() => {
-  loadCategories()
-})
 </script>
 
 <style lang="less" scoped>

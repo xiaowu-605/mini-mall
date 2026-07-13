@@ -95,15 +95,17 @@
 <script setup lang="ts">
 import { onMounted, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { ElMessage } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
 import { Loading, Goods } from '@element-plus/icons-vue'
 import { useCartStore } from '@/stores/cart'
 import { createOrder } from '@/api/orders'
+import { useDeleteConfirm } from '@/hooks/useDeleteConfirm'
 import type { CartItem } from '@/types'
 
 const router = useRouter()
 const cart = useCartStore()
+const { confirm: confirmDelete } = useDeleteConfirm()
 const dialogVisible = ref(false)
 const submitting = ref(false)
 const formRef = ref<FormInstance>()
@@ -121,14 +123,17 @@ const checkoutRules: FormRules = {
   ],
 }
 
+/** 页面初始化：获取购物车数据 */
 onMounted(() => {
   cart.fetchCart()
 })
 
+/** 返回首页 */
 function goHome() {
   router.push('/')
 }
 
+/** 增加商品数量 */
 async function handleIncrease(item: CartItem) {
   const newQuantity = item.quantity + 1
   const params = { quantity: newQuantity }
@@ -139,6 +144,7 @@ async function handleIncrease(item: CartItem) {
   }
 }
 
+/** 减少商品数量 */
 async function handleDecrease(item: CartItem) {
   const newQuantity = item.quantity - 1
   const params = { quantity: newQuantity }
@@ -149,33 +155,34 @@ async function handleDecrease(item: CartItem) {
   }
 }
 
+/** 删除购物车项 */
 async function handleRemove(item: CartItem) {
-  try {
-    await ElMessageBox.confirm(`确认从购物车中删除「${item.product?.name}」？`, '删除确认', {
-      confirmButtonText: '删除',
-      cancelButtonText: '取消',
-      type: 'warning',
-    })
-    await cart.remove(item.id)
-    ElMessage.success('已删除')
-  } catch {
-    // 用户取消
-  }
+  await confirmDelete({
+    message: `确认从购物车中删除「${item.product?.name}」？`,
+    onDelete: () => cart.remove(item.id),
+  })
 }
 
+/** 打开下单弹窗 */
 function handleSubmit() {
   checkoutForm.address = ''
   checkoutForm.phone = ''
   dialogVisible.value = true
 }
 
+/** 提交订单 */
 async function doCreateOrder() {
   const valid = await formRef.value?.validate().catch(() => false)
   if (!valid) return
 
   submitting.value = true
   try {
-    const res = await createOrder({ address: checkoutForm.address, phone: checkoutForm.phone })
+    const orderParams = { address: checkoutForm.address, phone: checkoutForm.phone }
+    const res = await createOrder(orderParams)
+    if (!res.data?.id) {
+      ElMessage.error('下单失败')
+      return
+    }
     dialogVisible.value = false
     ElMessage.success('下单成功')
     cart.fetchCart()

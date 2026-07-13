@@ -78,6 +78,7 @@ import { getCategories } from '@/api/categories'
 import type { Product, Category } from '@/types'
 import ProductCard from '@/components/product/ProductCard.vue'
 import Pagination from '@/components/common/Pagination.vue'
+import { createDebounce } from '@/utils/debounce'
 
 const route = useRoute()
 const router = useRouter()
@@ -91,8 +92,25 @@ const totalPages = ref(1)
 const searchQuery = ref('')
 const activeCategory = ref<number | null>(null)
 
-let debounceTimer: ReturnType<typeof setTimeout>
+const debounce = createDebounce(300)
+let initialLoadDone = false
 
+/** 页面初始化：从 URL 恢复状态并加载数据 */
+onMounted(async () => {
+  initFromQuery()
+  await loadCategories()
+  initialLoadDone = true
+  await loadProducts()
+})
+
+/** 监听分类变化 */
+watch(activeCategory, () => {
+  if (!initialLoadDone) return
+  updateURL()
+  loadProducts()
+})
+
+/** 从 URL 查询参数恢复搜索状态 */
 function initFromQuery() {
   const q = route.query
   if (q.search) searchQuery.value = q.search as string
@@ -100,6 +118,7 @@ function initFromQuery() {
   if (q.page) page.value = parseInt(q.page as string) || 1
 }
 
+/** 加载分类列表 */
 async function loadCategories() {
   try {
     const res = await getCategories()
@@ -109,6 +128,7 @@ async function loadCategories() {
   }
 }
 
+/** 加载商品列表 */
 async function loadProducts() {
   loading.value = true
   error.value = false
@@ -117,7 +137,7 @@ async function loadProducts() {
       search: searchQuery.value || undefined,
       categoryId: activeCategory.value ?? undefined,
       page: page.value,
-      pageSize: 9,
+      pageSize: 8,
     }
     const res = await getProducts(productParams)
     products.value = res.data.data
@@ -130,30 +150,30 @@ async function loadProducts() {
   }
 }
 
-// 切换分类
+/** 切换分类 */
 function selectCategory(categoryId: number | null) {
-  clearTimeout(debounceTimer)
   activeCategory.value = categoryId
   page.value = 1
 }
 
+/** 清除搜索 */
 function clearSearch() {
-  clearTimeout(debounceTimer)
   searchQuery.value = ''
   page.value = 1
   updateURL()
   loadProducts()
 }
 
+/** 搜索防抖 */
 function onSearch() {
-  clearTimeout(debounceTimer)
-  debounceTimer = setTimeout(() => {
+  debounce(() => {
     page.value = 1
     updateURL()
     loadProducts()
-  }, 300)
+  })
 }
 
+/** 翻页 */
 function onPageChange(newPage: number) {
   page.value = newPage
   updateURL()
@@ -161,6 +181,7 @@ function onPageChange(newPage: number) {
   window.scrollTo({ top: 0, behavior: 'smooth' })
 }
 
+/** 同步筛选参数到 URL */
 function updateURL() {
   const query: Record<string, string> = {}
   if (searchQuery.value) query.search = searchQuery.value
@@ -168,21 +189,6 @@ function updateURL() {
   if (page.value > 1) query.page = String(page.value)
   router.replace({ query })
 }
-
-let initialLoadDone = false
-
-watch(activeCategory, () => {
-  if (!initialLoadDone) return
-  updateURL()
-  loadProducts()
-})
-
-onMounted(async () => {
-  initFromQuery()
-  await loadCategories()
-  initialLoadDone = true
-  await loadProducts()
-})
 </script>
 
 <style lang="less" scoped>

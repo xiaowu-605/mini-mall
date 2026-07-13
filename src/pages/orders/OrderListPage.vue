@@ -48,33 +48,23 @@
 import { ref, onMounted } from 'vue'
 import { getMyOrders } from '@/api/orders'
 import { statusLabel, statusType } from '@/utils/order'
+import { formatTime } from '@/utils/format'
+import { useAsyncData } from '@/hooks/useAsyncData'
 import type { Order } from '@/types'
 
 const orders = ref<Order[]>([])
-const loading = ref(true)
-const error = ref(false)
+const { loading, error, run } = useAsyncData()
 
-function formatTime(iso: string): string {
-  return new Date(iso).toLocaleString('zh-CN')
-}
-
-async function loadOrders() {
-  loading.value = true
-  error.value = false
-  try {
-    const res = await getMyOrders()
-    orders.value = res.data
-  } catch (e) {
-    console.error('加载订单失败:', e)
-    error.value = true
-  } finally {
-    loading.value = false
-  }
-}
-
+/** 页面初始化：加载订单列表 */
 onMounted(() => {
   loadOrders()
 })
+
+/** 加载订单列表 */
+async function loadOrders() {
+  const res = await run(() => getMyOrders())
+  if (res) orders.value = res.data
+}
 </script>
 
 <style lang="less" scoped>

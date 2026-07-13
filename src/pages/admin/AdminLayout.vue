@@ -51,6 +51,7 @@ if (!auth.isAdmin) {
   router.replace('/')
 }
 
+/** 当前激活的菜单项 */
 const activeMenu = computed(() => route.path)
 </script>
 

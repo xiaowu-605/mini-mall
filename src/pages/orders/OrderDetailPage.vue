@@ -92,6 +92,12 @@ const order = ref<Order | null>(null)
 const loading = ref(true)
 const notFound = ref(false)
 
+/** 页面初始化：加载订单详情 */
+onMounted(() => {
+  loadOrder()
+})
+
+/** 加载订单详情 */
 async function loadOrder() {
   loading.value = true
   notFound.value = false
@@ -113,6 +119,7 @@ async function loadOrder() {
   }
 }
 
+/** 模拟支付 */
 async function doPay() {
   if (!order.value) return
   try {
@@ -127,6 +134,7 @@ async function doPay() {
   }
 }
 
+/** 取消订单 */
 async function doCancel() {
   if (!order.value) return
   try {
@@ -138,10 +146,6 @@ async function doCancel() {
     ElMessage.error(e.response?.data?.error || '取消失败')
   }
 }
-
-onMounted(() => {
-  loadOrder()
-})
 </script>
 
 <style lang="less" scoped>

@@ -60,7 +60,7 @@
 
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { ElMessage } from 'element-plus'
 import {
   getAdminProducts,
   createAdminProduct,
@@ -68,6 +68,7 @@ import {
   deleteAdminProduct,
 } from '@/api/admin'
 import { getAdminCategories } from '@/api/admin'
+import { useDeleteConfirm } from '@/hooks/useDeleteConfirm'
 import type { Product } from '@/types'
 
 const products = ref<Product[]>([])
@@ -76,6 +77,8 @@ const loading = ref(false)
 const dialogVisible = ref(false)
 const submitting = ref(false)
 const editingProduct = ref<Product | null>(null)
+
+const { confirm: confirmDelete } = useDeleteConfirm()
 
 const form = reactive({
   name: '',
@@ -86,6 +89,12 @@ const form = reactive({
   categoryId: null as number | null,
 })
 
+/** 页面初始化：加载数据 */
+onMounted(() => {
+  loadData()
+})
+
+/** 重置表单 */
 function resetForm() {
   form.name = ''
   form.description = ''
@@ -95,6 +104,7 @@ function resetForm() {
   form.categoryId = null
 }
 
+/** 打开新增/编辑弹窗 */
 function openDialog(product: Product | null) {
   editingProduct.value = product
   if (product) {
@@ -110,6 +120,7 @@ function openDialog(product: Product | null) {
   dialogVisible.value = true
 }
 
+/** 加载商品和分类数据 */
 async function loadData() {
   loading.value = true
   try {
@@ -123,6 +134,7 @@ async function loadData() {
   }
 }
 
+/** 保存商品 */
 async function doSave() {
   if (!form.name || !form.categoryId) {
     ElMessage.warning('请填写名称和分类')
@@ -146,30 +158,14 @@ async function doSave() {
   }
 }
 
+/** 删除商品 */
 async function doDelete(id: number) {
-  try {
-    await ElMessageBox.confirm('确认删除该商品？', '删除确认', {
-      type: 'warning',
-      confirmButtonText: '删除',
-      cancelButtonText: '取消',
-    })
-  } catch {
-    // 用户取消对话框
-    return
-  }
-
-  try {
-    await deleteAdminProduct(id)
-    ElMessage.success('已删除')
-    await loadData()
-  } catch (e: any) {
-    ElMessage.error(e.response?.data?.error || '删除失败')
-  }
+  await confirmDelete({
+    message: '确认删除该商品？',
+    onDelete: () => deleteAdminProduct(id),
+    onSuccess: loadData,
+  })
 }
-
-onMounted(() => {
-  loadData()
-})
 </script>
 
 <style lang="less" scoped>

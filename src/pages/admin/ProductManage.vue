@@ -140,15 +140,16 @@ import { getAdminCategories } from '@/api/admin'
 import { useDeleteConfirm } from '@/hooks/useDeleteConfirm'
 import type { Product } from '@/types'
 
-const products = ref<Product[]>([])
-const categories = ref<any[]>([])
-const loading = ref(false)
-const dialogVisible = ref(false)
-const submitting = ref(false)
+let products = ref<Product[]>([])
+let categories = ref<any[]>([])
+let loading = ref(false)
+let dialogVisible = ref(false)
+let submitting = ref(false)
 const editingProduct = ref<Product | null>(null)
 
 const { confirm: confirmDelete } = useDeleteConfirm()
 
+// 商品编辑表单：名称/分类/价格/库存/描述/图片
 const form = reactive({
   name: '',
   description: '',

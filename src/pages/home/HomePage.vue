@@ -105,14 +105,14 @@ import { createDebounce } from '@/utils/debounce'
 const route = useRoute()
 const router = useRouter()
 
-const products = ref<Product[]>([])
-const categories = ref<Category[]>([])
-const loading = ref(true)
-const error = ref(false)
-const page = ref(1)
-const totalPages = ref(1)
-const searchQuery = ref('')
-const activeCategory = ref<number | null>(null)
+let products = ref<Product[]>([])
+let categories = ref<Category[]>([])
+let loading = ref(true)
+let error = ref(false)
+let page = ref(1)
+let totalPages = ref(1)
+let searchQuery = ref('')
+let activeCategory = ref<number | null>(null)
 
 const debounce = createDebounce(300)
 let initialLoadDone = false

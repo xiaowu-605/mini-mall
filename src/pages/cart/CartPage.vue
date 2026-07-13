@@ -167,10 +167,11 @@ import type { CartItem } from '@/types'
 const router = useRouter()
 const cart = useCartStore()
 const { confirm: confirmDelete } = useDeleteConfirm()
-const dialogVisible = ref(false)
-const submitting = ref(false)
+let dialogVisible = ref(false)
+let submitting = ref(false)
 const formRef = ref<FormInstance>()
 
+// 下单表单：收货地址 + 联系电话
 const checkoutForm = reactive({
   address: '',
   phone: '',
@@ -224,7 +225,7 @@ async function handleRemove(item: CartItem) {
   })
 }
 
-/** 打开下单弹窗 */
+/** 打开下单弹窗——重置表单并显示 */
 function handleSubmit() {
   checkoutForm.address = ''
   checkoutForm.phone = ''

@@ -127,8 +127,8 @@ const route = useRoute()
 const router = useRouter()
 const cart = useCartStore()
 const order = ref<Order | null>(null)
-const loading = ref(true)
-const notFound = ref(false)
+let loading = ref(true)
+let notFound = ref(false)
 
 /** 页面初始化：加载订单详情 */
 onMounted(() => {

@@ -68,8 +68,9 @@ const router = useRouter()
 const route = useRoute()
 const authStore = useAuthStore()
 const formRef = ref<FormInstance>()
-const loading = ref(false)
+let loading = ref(false)
 
+// 登录表单：邮箱 + 密码
 const form = reactive({
   email: '',
   password: '',

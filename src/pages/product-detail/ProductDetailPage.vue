@@ -115,10 +115,10 @@ const router = useRouter()
 const auth = useAuthStore()
 const cart = useCartStore()
 const product = ref<Product | null>(null)
-const loading = ref(true)
-const notFound = ref(false)
-const quantity = ref(1)
-const showCartTip = ref(false)
+let loading = ref(true)
+let notFound = ref(false)
+let quantity = ref(1)
+let showCartTip = ref(false)
 
 /** 页面初始化：加载商品详情 */
 onMounted(() => {

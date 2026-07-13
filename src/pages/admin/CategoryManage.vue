@@ -77,10 +77,10 @@ import { useDeleteConfirm } from '@/hooks/useDeleteConfirm'
 
 const { confirm: confirmDelete } = useDeleteConfirm()
 const categories = ref<any[]>([])
-const loading = ref(false)
-const dialogVisible = ref(false)
-const submitting = ref(false)
-const newName = ref('')
+let loading = ref(false)
+let dialogVisible = ref(false)
+let submitting = ref(false)
+let newName = ref('')
 
 /** 页面初始化：加载分类列表 */
 onMounted(() => {

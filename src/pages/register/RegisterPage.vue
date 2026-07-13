@@ -89,8 +89,9 @@ import { useAuthStore } from '@/stores/auth'
 const router = useRouter()
 const authStore = useAuthStore()
 const formRef = ref<FormInstance>()
-const loading = ref(false)
+let loading = ref(false)
 
+// 注册表单：昵称 + 邮箱 + 密码 + 确认密码
 const form = reactive({
   name: '',
   email: '',

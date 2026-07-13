@@ -101,11 +101,33 @@
         </div>
       </div>
     </div>
+
+    <!-- 返回顶部 -->
+    <transition name="el-fade-in">
+      <button
+        v-show="showBackTop"
+        class="home-page__back-top"
+        @click="scrollToTop"
+      >
+        <svg
+          viewBox="0 0 24 24"
+          width="20"
+          height="20"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <polyline points="18 15 12 9 6 15" />
+        </svg>
+      </button>
+    </transition>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watch, nextTick } from 'vue'
+import { ref, onMounted, onUnmounted, watch, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { Search } from '@element-plus/icons-vue'
 import { getProducts } from '@/api/products'
@@ -158,6 +180,20 @@ watch(nearEnd, (val) => {
   }
 })
 
+// 返回顶部按钮显隐
+const showBackTop = ref(false)
+const BACK_TOP_THRESHOLD = 400
+
+/** 监听滚动，控制返回顶部按钮显隐 */
+function onBackTopScroll() {
+  showBackTop.value = window.scrollY > BACK_TOP_THRESHOLD
+}
+
+/** 平滑滚动到页面顶部 */
+function scrollToTop() {
+  window.scrollTo({ top: 0, behavior: 'smooth' })
+}
+
 onMounted(async () => {
   const stickyEl = document.querySelector(
     '.home-page__sticky',
@@ -166,10 +202,16 @@ onMounted(async () => {
     stickyHeight.value = stickyEl.offsetHeight + 56
   }
 
+  window.addEventListener('scroll', onBackTopScroll, { passive: true })
+
   initFromQuery()
   await loadCategories()
   initialLoadDone = true
   await loadFirstPage()
+})
+
+onUnmounted(() => {
+  window.removeEventListener('scroll', onBackTopScroll)
 })
 
 /** 筛选变化时重新加载 */
@@ -379,6 +421,32 @@ function updateURL() {
 
   &__empty {
     padding: 60px 0;
+  }
+
+  &__back-top {
+    position: fixed;
+    right: 24px;
+    bottom: 40px;
+    z-index: 100;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: @color-bg-white;
+    border: 1px solid @color-border;
+    box-shadow: @shadow-md;
+    color: @color-text-secondary;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+
+    &:hover {
+      color: @color-primary;
+      border-color: @color-primary;
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+      transform: translateY(-1px);
+    }
   }
 }
 </style>

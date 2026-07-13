@@ -96,8 +96,9 @@ async function onSubmit() {
     ElMessage.success('登录成功')
     const redirect = route.query.redirect as string
     router.push(redirect || '/')
-  } catch (e: any) {
-    ElMessage.error(e.response?.data?.error || '登录失败')
+  } catch (e) {
+    console.error(e)
+    // 错误提示已由拦截器统一处理
   } finally {
     loading.value = false
   }

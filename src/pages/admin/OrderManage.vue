@@ -114,8 +114,9 @@ async function doChangeStatus(orderId: number, status: string) {
     await updateAdminOrderStatus(orderId, orderParams.status)
     ElMessage.success('状态已更新')
     await loadOrders()
-  } catch (e: any) {
-    ElMessage.error(e.response?.data?.error || '更新失败')
+  } catch (e) {
+    console.error(e)
+    // 错误提示已由拦截器统一处理
   }
 }
 </script>

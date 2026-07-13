@@ -136,8 +136,9 @@ async function onSubmit() {
     await authStore.fetchUser()
     ElMessage.success('注册成功')
     router.push('/')
-  } catch (e: any) {
-    ElMessage.error(e.response?.data?.error || '注册失败')
+  } catch (e) {
+    console.error(e)
+    // 错误提示已由拦截器统一处理
   } finally {
     loading.value = false
   }

@@ -161,8 +161,9 @@ async function addToCart() {
     setTimeout(() => {
       showCartTip.value = false
     }, 1500)
-  } catch (e: any) {
-    ElMessage.error(e.response?.data?.error || '加入购物车失败')
+  } catch (e) {
+    console.error(e)
+    // 错误提示已由拦截器统一处理
   }
 }
 </script>

@@ -201,8 +201,9 @@ async function handleIncrease(item: CartItem) {
   const params = { quantity: newQuantity }
   try {
     await cart.updateQuantity(item.id, params)
-  } catch (e: any) {
-    ElMessage.error(e.response?.data?.error || '操作失败')
+  } catch (e) {
+    console.error(e)
+    // 错误提示已由拦截器统一处理
   }
 }
 
@@ -212,8 +213,9 @@ async function handleDecrease(item: CartItem) {
   const params = { quantity: newQuantity }
   try {
     await cart.updateQuantity(item.id, params)
-  } catch (e: any) {
-    ElMessage.error(e.response?.data?.error || '操作失败')
+  } catch (e) {
+    console.error(e)
+    // 错误提示已由拦截器统一处理
   }
 }
 
@@ -249,8 +251,9 @@ async function doCreateOrder() {
     ElMessage.success('下单成功')
     cart.fetchCart()
     router.push(`/orders/${res.data.id}`)
-  } catch (e: any) {
-    ElMessage.error(e.response?.data?.error || '下单失败')
+  } catch (e) {
+    console.error(e)
+    // 错误提示已由拦截器统一处理
   } finally {
     submitting.value = false
   }

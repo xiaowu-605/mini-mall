@@ -167,8 +167,9 @@ async function doPay() {
     ElMessage.success('支付成功')
     // 刷新购物车（因为清空了）
     cart.fetchCart()
-  } catch (e: any) {
-    ElMessage.error(e.response?.data?.error || '支付失败')
+  } catch (e) {
+    console.error(e)
+    // 错误提示已由拦截器统一处理
   }
 }
 
@@ -180,8 +181,9 @@ async function doCancel() {
     await updateOrder(order.value.id, cancelParams)
     ElMessage.success('订单已取消')
     router.push('/orders')
-  } catch (e: any) {
-    ElMessage.error(e.response?.data?.error || '取消失败')
+  } catch (e) {
+    console.error(e)
+    // 错误提示已由拦截器统一处理
   }
 }
 </script>

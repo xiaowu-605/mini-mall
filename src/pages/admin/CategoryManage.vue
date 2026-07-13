@@ -119,8 +119,9 @@ async function doCreate() {
     ElMessage.success('新增成功')
     dialogVisible.value = false
     await loadCategories()
-  } catch (e: any) {
-    ElMessage.error(e.response?.data?.error || '新增失败')
+  } catch (e) {
+    console.error(e)
+    // 错误提示已由拦截器统一处理
   } finally {
     submitting.value = false
   }

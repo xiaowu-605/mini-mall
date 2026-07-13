@@ -45,7 +45,8 @@
       "Bash(taskkill //PID 25316 //F)",
       "Bash(npx tsc *)",
       "Bash(npx vite *)",
-      "Bash(timeout 6 pnpm dev:frontend)"
+      "Bash(timeout 6 pnpm dev:frontend)",
+      "Bash(cd c:\\\\\\\\Users\\\\\\\\87018\\\\\\\\Desktop\\\\\\\\wuxh\\\\\\\\AICoding\\\\\\\\mini-mall)"
     ],
     "deny": [
       "Bash(rm -rf *)"

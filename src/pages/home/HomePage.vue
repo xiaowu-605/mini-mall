@@ -42,27 +42,49 @@
       </div>
 
       <!-- 加载中 -->
-      <div v-if="loading" v-loading="loading" class="home-page__loading" />
+      <div
+        v-if="loading"
+        v-loading="loading"
+        class="home-page__loading"
+      />
 
       <!-- 加载失败 -->
-      <div v-else-if="error" class="home-page__error">
+      <div
+        v-else-if="error"
+        class="home-page__error"
+      >
         <el-empty description="加载失败，请重试">
-          <el-button type="primary" @click="loadProducts">重新加载</el-button>
+          <el-button
+            type="primary"
+            @click="loadProducts"
+            >重新加载</el-button
+          >
         </el-empty>
       </div>
 
       <!-- 商品网格 -->
       <div v-else-if="products.length > 0">
         <div class="home-page__grid">
-          <ProductCard v-for="product in products" :key="product.id" :product="product" />
+          <ProductCard
+            v-for="product in products"
+            :key="product.id"
+            :product="product"
+          />
         </div>
         <div class="home-page__pagination">
-          <Pagination :current-page="page" :total-pages="totalPages" @change="onPageChange" />
+          <Pagination
+            :current-page="page"
+            :total-pages="totalPages"
+            @change="onPageChange"
+          />
         </div>
       </div>
 
       <!-- 空状态 -->
-      <div v-else class="home-page__empty">
+      <div
+        v-else
+        class="home-page__empty"
+      >
         <el-empty description="暂无商品" />
       </div>
     </div>

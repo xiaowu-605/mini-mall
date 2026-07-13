@@ -1,5 +1,8 @@
 <template>
-  <div v-if="totalPages > 1" class="pagination-wrap">
+  <div
+    v-if="totalPages > 1"
+    class="pagination-wrap"
+  >
     <el-pagination
       :current-page="currentPage"
       :page-size="1"

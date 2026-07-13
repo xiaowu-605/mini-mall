@@ -2,21 +2,61 @@
   <div class="admin-page">
     <div class="admin-page__header">
       <h2>商品管理</h2>
-      <el-button type="primary" @click="openDialog(null)">新增商品</el-button>
+      <el-button
+        type="primary"
+        @click="openDialog(null)"
+        >新增商品</el-button
+      >
     </div>
 
-    <el-table :data="products" :border="true" stripe v-loading="loading">
-      <el-table-column prop="id" label="ID" width="60" />
-      <el-table-column prop="name" label="名称" min-width="150" />
-      <el-table-column label="分类" width="100">
+    <el-table
+      :data="products"
+      :border="true"
+      stripe
+      v-loading="loading"
+    >
+      <el-table-column
+        prop="id"
+        label="ID"
+        width="60"
+      />
+      <el-table-column
+        prop="name"
+        label="名称"
+        min-width="150"
+      />
+      <el-table-column
+        label="分类"
+        width="100"
+      >
         <template #default="{ row }">{{ row.category?.name }}</template>
       </el-table-column>
-      <el-table-column prop="price" label="价格" width="100" />
-      <el-table-column prop="stock" label="库存" width="80" />
-      <el-table-column label="操作" width="160">
+      <el-table-column
+        prop="price"
+        label="价格"
+        width="100"
+      />
+      <el-table-column
+        prop="stock"
+        label="库存"
+        width="80"
+      />
+      <el-table-column
+        label="操作"
+        width="160"
+      >
         <template #default="{ row }">
-          <el-button size="small" @click="openDialog(row)">编辑</el-button>
-          <el-button size="small" type="danger" @click="doDelete(row.id)">删除</el-button>
+          <el-button
+            size="small"
+            @click="openDialog(row)"
+            >编辑</el-button
+          >
+          <el-button
+            size="small"
+            type="danger"
+            @click="doDelete(row.id)"
+            >删除</el-button
+          >
         </template>
       </el-table-column>
     </el-table>
@@ -28,31 +68,60 @@
       width="500px"
       @close="dialogVisible = false"
     >
-      <el-form :model="form" label-width="80px">
+      <el-form
+        :model="form"
+        label-width="80px"
+      >
         <el-form-item label="名称">
           <el-input v-model="form.name" />
         </el-form-item>
         <el-form-item label="分类">
-          <el-select v-model="form.categoryId" placeholder="请选择分类">
-            <el-option v-for="cat in categories" :key="cat.id" :label="cat.name" :value="cat.id" />
+          <el-select
+            v-model="form.categoryId"
+            placeholder="请选择分类"
+          >
+            <el-option
+              v-for="cat in categories"
+              :key="cat.id"
+              :label="cat.name"
+              :value="cat.id"
+            />
           </el-select>
         </el-form-item>
         <el-form-item label="价格">
-          <el-input-number v-model="form.price" :min="0" :precision="2" />
+          <el-input-number
+            v-model="form.price"
+            :min="0"
+            :precision="2"
+          />
         </el-form-item>
         <el-form-item label="库存">
-          <el-input-number v-model="form.stock" :min="0" />
+          <el-input-number
+            v-model="form.stock"
+            :min="0"
+          />
         </el-form-item>
         <el-form-item label="描述">
-          <el-input v-model="form.description" type="textarea" />
+          <el-input
+            v-model="form.description"
+            type="textarea"
+          />
         </el-form-item>
         <el-form-item label="图片URL">
-          <el-input v-model="form.image" placeholder="可选" />
+          <el-input
+            v-model="form.image"
+            placeholder="可选"
+          />
         </el-form-item>
       </el-form>
       <template #footer>
         <el-button @click="dialogVisible = false">取消</el-button>
-        <el-button type="primary" :loading="submitting" @click="doSave">保存</el-button>
+        <el-button
+          type="primary"
+          :loading="submitting"
+          @click="doSave"
+          >保存</el-button
+        >
       </template>
     </el-dialog>
   </div>

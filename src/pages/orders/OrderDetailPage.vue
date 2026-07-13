@@ -1,17 +1,36 @@
 <template>
   <div class="order-detail">
     <div class="order-detail__container">
-      <router-link to="/orders" class="order-detail__back"> ← 返回订单列表 </router-link>
+      <router-link
+        to="/orders"
+        class="order-detail__back"
+      >
+        ← 返回订单列表
+      </router-link>
 
-      <div v-if="loading" v-loading="loading" class="order-detail__loading" />
+      <div
+        v-if="loading"
+        v-loading="loading"
+        class="order-detail__loading"
+      />
 
-      <div v-else-if="notFound" class="order-detail__empty">
+      <div
+        v-else-if="notFound"
+        class="order-detail__empty"
+      >
         <el-empty description="订单不存在" />
       </div>
 
-      <div v-else-if="!order" class="order-detail__empty">
+      <div
+        v-else-if="!order"
+        class="order-detail__empty"
+      >
         <el-empty description="加载失败，请重试">
-          <el-button type="primary" @click="loadOrder">重新加载</el-button>
+          <el-button
+            type="primary"
+            @click="loadOrder"
+            >重新加载</el-button
+          >
         </el-empty>
       </div>
 
@@ -32,7 +51,11 @@
         <!-- 商品明细 -->
         <div class="order-detail__section">
           <h3>商品明细</h3>
-          <div v-for="item in order.items" :key="item.id" class="order-detail__item">
+          <div
+            v-for="item in order.items"
+            :key="item.id"
+            class="order-detail__item"
+          >
             <router-link
               v-if="item.product"
               :to="`/products/${item.productId}`"
@@ -53,7 +76,10 @@
               <span>商品合计</span>
               <span>¥{{ order.total }}</span>
             </div>
-            <div class="order-detail__row" v-if="order.discount < 1">
+            <div
+              class="order-detail__row"
+              v-if="order.discount < 1"
+            >
               <span>会员折扣（{{ (order.discount * 10).toFixed(1) }} 折）</span>
               <span class="order-detail__discount"
                 >-¥{{ (order.total - order.discountedTotal).toFixed(2) }}</span
@@ -67,9 +93,21 @@
         </div>
 
         <!-- 操作按钮 -->
-        <div v-if="order.status === 'pending'" class="order-detail__actions">
-          <el-button type="primary" size="large" @click="doPay">确认支付</el-button>
-          <el-button size="large" @click="doCancel">取消订单</el-button>
+        <div
+          v-if="order.status === 'pending'"
+          class="order-detail__actions"
+        >
+          <el-button
+            type="primary"
+            size="large"
+            @click="doPay"
+            >确认支付</el-button
+          >
+          <el-button
+            size="large"
+            @click="doCancel"
+            >取消订单</el-button
+          >
         </div>
       </template>
     </div>

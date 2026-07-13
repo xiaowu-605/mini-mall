@@ -1,29 +1,55 @@
 <template>
   <div class="product-detail">
     <div class="product-detail__container">
-      <router-link to="/" class="product-detail__back"> ← 返回首页 </router-link>
+      <router-link
+        to="/"
+        class="product-detail__back"
+      >
+        ← 返回首页
+      </router-link>
 
-      <div v-if="loading" v-loading="loading" class="product-detail__loading" />
+      <div
+        v-if="loading"
+        v-loading="loading"
+        class="product-detail__loading"
+      />
 
-      <div v-else-if="notFound" class="product-detail__not-found">
+      <div
+        v-else-if="notFound"
+        class="product-detail__not-found"
+      >
         <el-empty description="商品不存在" />
       </div>
 
-      <div v-else-if="!product" class="product-detail__not-found">
+      <div
+        v-else-if="!product"
+        class="product-detail__not-found"
+      >
         <el-empty description="加载失败，请重试">
-          <el-button type="primary" @click="loadProduct">重新加载</el-button>
+          <el-button
+            type="primary"
+            @click="loadProduct"
+            >重新加载</el-button
+          >
         </el-empty>
       </div>
 
       <template v-else>
         <div class="product-detail__card">
           <div class="product-detail__image-wrap">
-            <img :src="product.image || '/placeholder.svg'" :alt="product.name" />
+            <img
+              :src="product.image || '/placeholder.svg'"
+              :alt="product.name"
+            />
           </div>
 
           <div class="product-detail__info">
             <div>
-              <el-tag size="small" type="info">{{ product.category?.name || '未分类' }}</el-tag>
+              <el-tag
+                size="small"
+                type="info"
+                >{{ product.category?.name || '未分类' }}</el-tag
+              >
               <h1 class="product-detail__name">{{ product.name }}</h1>
             </div>
 
@@ -33,8 +59,14 @@
             </div>
 
             <div class="product-detail__stock">
-              <span class="dot" :class="product.stock > 0 ? 'dot--in' : 'dot--out'" />
-              <span class="text" :class="product.stock > 0 ? 'text--in' : 'text--out'">
+              <span
+                class="dot"
+                :class="product.stock > 0 ? 'dot--in' : 'dot--out'"
+              />
+              <span
+                class="text"
+                :class="product.stock > 0 ? 'text--in' : 'text--out'"
+              >
                 {{ product.stock > 0 ? `有货（库存 ${product.stock} 件）` : '已售罄' }}
               </span>
             </div>

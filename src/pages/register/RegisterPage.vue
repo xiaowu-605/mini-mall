@@ -10,15 +10,31 @@
         label-position="top"
         @submit.prevent="onSubmit"
       >
-        <el-form-item label="昵称" prop="name">
-          <el-input v-model="form.name" placeholder="请输入昵称" />
+        <el-form-item
+          label="昵称"
+          prop="name"
+        >
+          <el-input
+            v-model="form.name"
+            placeholder="请输入昵称"
+          />
         </el-form-item>
 
-        <el-form-item label="邮箱" prop="email">
-          <el-input v-model="form.email" type="email" placeholder="请输入邮箱" />
+        <el-form-item
+          label="邮箱"
+          prop="email"
+        >
+          <el-input
+            v-model="form.email"
+            type="email"
+            placeholder="请输入邮箱"
+          />
         </el-form-item>
 
-        <el-form-item label="密码" prop="password">
+        <el-form-item
+          label="密码"
+          prop="password"
+        >
           <el-input
             v-model="form.password"
             type="password"
@@ -27,7 +43,10 @@
           />
         </el-form-item>
 
-        <el-form-item label="确认密码" prop="confirmPassword">
+        <el-form-item
+          label="确认密码"
+          prop="confirmPassword"
+        >
           <el-input
             v-model="form.confirmPassword"
             type="password"
@@ -37,14 +56,23 @@
         </el-form-item>
 
         <el-form-item>
-          <el-button type="primary" class="auth-card__submit" :loading="loading" @click="onSubmit">
+          <el-button
+            type="primary"
+            class="auth-card__submit"
+            :loading="loading"
+            @click="onSubmit"
+          >
             注册
           </el-button>
         </el-form-item>
       </el-form>
 
       <p class="auth-card__tip">
-        已有账号？<router-link to="/login" class="auth-card__link">立即登录</router-link>
+        已有账号？<router-link
+          to="/login"
+          class="auth-card__link"
+          >立即登录</router-link
+        >
       </p>
     </div>
   </div>

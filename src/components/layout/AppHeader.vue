@@ -2,11 +2,18 @@
   <header class="app-header">
     <div class="app-header__inner">
       <!-- Logo -->
-      <router-link to="/" class="app-header__logo">Mini-Mall</router-link>
+      <router-link
+        to="/"
+        class="app-header__logo"
+        >Mini-Mall</router-link
+      >
 
       <!-- 右侧导航 -->
       <div class="app-header__nav">
-        <router-link to="/cart" class="app-header__link">
+        <router-link
+          to="/cart"
+          class="app-header__link"
+        >
           <el-icon><ShoppingCart /></el-icon>
           <span>购物车</span>
           <el-badge
@@ -16,14 +23,20 @@
           />
         </router-link>
 
-        <router-link to="/orders" class="app-header__link">
+        <router-link
+          to="/orders"
+          class="app-header__link"
+        >
           <el-icon><Tickets /></el-icon>
           <span>我的订单</span>
         </router-link>
 
         <!-- 未登录 -->
         <template v-if="!auth.isLoggedIn">
-          <router-link to="/login" class="app-header__link">
+          <router-link
+            to="/login"
+            class="app-header__link"
+          >
             <el-icon><User /></el-icon>
             <span>登录</span>
           </router-link>
@@ -31,7 +44,10 @@
 
         <!-- 已登录 -->
         <template v-else>
-          <el-dropdown trigger="click" @command="onCommand">
+          <el-dropdown
+            trigger="click"
+            @command="onCommand"
+          >
             <span class="app-header__user">
               <el-icon><UserFilled /></el-icon>
               <span>{{ auth.user?.name }}</span>
@@ -40,8 +56,16 @@
             <template #dropdown>
               <el-dropdown-menu>
                 <el-dropdown-item command="orders">我的订单</el-dropdown-item>
-                <el-dropdown-item v-if="auth.isAdmin" command="admin">后台管理</el-dropdown-item>
-                <el-dropdown-item divided command="logout">退出登录</el-dropdown-item>
+                <el-dropdown-item
+                  v-if="auth.isAdmin"
+                  command="admin"
+                  >后台管理</el-dropdown-item
+                >
+                <el-dropdown-item
+                  divided
+                  command="logout"
+                  >退出登录</el-dropdown-item
+                >
               </el-dropdown-menu>
             </template>
           </el-dropdown>

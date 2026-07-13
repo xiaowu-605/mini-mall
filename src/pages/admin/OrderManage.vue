@@ -4,37 +4,79 @@
       <h2>订单管理</h2>
     </div>
 
-    <el-table :data="orders" border stripe v-loading="loading">
-      <el-table-column prop="id" label="订单号" width="80" />
-      <el-table-column label="用户" width="120">
+    <el-table
+      :data="orders"
+      border
+      stripe
+      v-loading="loading"
+    >
+      <el-table-column
+        prop="id"
+        label="订单号"
+        width="80"
+      />
+      <el-table-column
+        label="用户"
+        width="120"
+      >
         <template #default="{ row }">{{ row.user?.name }}</template>
       </el-table-column>
-      <el-table-column label="金额" width="100">
+      <el-table-column
+        label="金额"
+        width="100"
+      >
         <template #default="{ row }">¥{{ row.discountedTotal }}</template>
       </el-table-column>
-      <el-table-column label="状态" width="120">
+      <el-table-column
+        label="状态"
+        width="120"
+      >
         <template #default="{ row }">
           <el-tag :type="statusType(row.status)">{{ statusLabel(row.status) }}</el-tag>
         </template>
       </el-table-column>
-      <el-table-column label="收货信息" min-width="150">
+      <el-table-column
+        label="收货信息"
+        min-width="150"
+      >
         <template #default="{ row }">{{ row.address }} / {{ row.phone }}</template>
       </el-table-column>
-      <el-table-column label="时间" width="160">
+      <el-table-column
+        label="时间"
+        width="160"
+      >
         <template #default="{ row }">{{ formatTime(row.createdAt) }}</template>
       </el-table-column>
-      <el-table-column label="操作" width="180">
+      <el-table-column
+        label="操作"
+        width="180"
+      >
         <template #default="{ row }">
           <el-select
             :model-value="row.status"
             size="small"
             @change="(val: string) => doChangeStatus(row.id, val)"
           >
-            <el-option label="待付款" value="pending" />
-            <el-option label="已支付" value="paid" />
-            <el-option label="已发货" value="shipped" />
-            <el-option label="已完成" value="completed" />
-            <el-option label="已取消" value="cancelled" />
+            <el-option
+              label="待付款"
+              value="pending"
+            />
+            <el-option
+              label="已支付"
+              value="paid"
+            />
+            <el-option
+              label="已发货"
+              value="shipped"
+            />
+            <el-option
+              label="已完成"
+              value="completed"
+            />
+            <el-option
+              label="已取消"
+              value="cancelled"
+            />
           </el-select>
         </template>
       </el-table-column>

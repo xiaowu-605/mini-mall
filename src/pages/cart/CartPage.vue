@@ -3,31 +3,56 @@
     <h1 class="cart-page__title">购物车</h1>
 
     <!-- 加载中 -->
-    <div v-if="cart.loading" class="cart-page__loading">
+    <div
+      v-if="cart.loading"
+      class="cart-page__loading"
+    >
       <el-icon class="is-loading"><Loading /></el-icon>
       <span>加载中...</span>
     </div>
 
     <!-- 空购物车 -->
-    <div v-else-if="!cart.items.length" class="cart-page__empty">
+    <div
+      v-else-if="!cart.items.length"
+      class="cart-page__empty"
+    >
       <el-empty description="购物车是空的">
-        <el-button type="primary" @click="goHome">去逛逛</el-button>
+        <el-button
+          type="primary"
+          @click="goHome"
+          >去逛逛</el-button
+        >
       </el-empty>
     </div>
 
     <!-- 购物车列表 -->
     <template v-else>
       <div class="cart-page__list">
-        <div v-for="item in cart.items" :key="item.id" class="cart-item">
+        <div
+          v-for="item in cart.items"
+          :key="item.id"
+          class="cart-item"
+        >
           <!-- 商品图片 -->
           <div class="cart-item__image">
-            <img v-if="item.product?.image" :src="item.product.image" :alt="item.product.name" />
-            <el-icon v-else :size="48"><Goods /></el-icon>
+            <img
+              v-if="item.product?.image"
+              :src="item.product.image"
+              :alt="item.product.name"
+            />
+            <el-icon
+              v-else
+              :size="48"
+              ><Goods
+            /></el-icon>
           </div>
 
           <!-- 商品信息 -->
           <div class="cart-item__info">
-            <router-link :to="`/products/${item.product?.id}`" class="cart-item__name">
+            <router-link
+              :to="`/products/${item.product?.id}`"
+              class="cart-item__name"
+            >
               {{ item.product?.name }}
             </router-link>
             <span class="cart-item__price">¥{{ item.product?.price?.toFixed(2) }}</span>
@@ -35,7 +60,11 @@
 
           <!-- 数量控制 -->
           <div class="cart-item__quantity">
-            <el-button size="small" :disabled="item.quantity <= 1" @click="handleDecrease(item)">
+            <el-button
+              size="small"
+              :disabled="item.quantity <= 1"
+              @click="handleDecrease(item)"
+            >
               -
             </el-button>
             <span class="cart-item__quantity-num">{{ item.quantity }}</span>
@@ -70,23 +99,55 @@
         <span class="cart-page__total">
           合计：<strong>¥{{ cart.totalPrice.toFixed(2) }}</strong>
         </span>
-        <el-button type="primary" size="large" @click="handleSubmit"> 提交订单 </el-button>
+        <el-button
+          type="primary"
+          size="large"
+          @click="handleSubmit"
+        >
+          提交订单
+        </el-button>
       </div>
     </template>
 
     <!-- 下单弹窗 -->
-    <el-dialog v-model="dialogVisible" title="确认订单信息" width="450px">
-      <el-form ref="formRef" :model="checkoutForm" :rules="checkoutRules" label-width="80px">
-        <el-form-item label="收货地址" prop="address">
-          <el-input v-model="checkoutForm.address" placeholder="请输入收货地址" />
+    <el-dialog
+      v-model="dialogVisible"
+      title="确认订单信息"
+      width="450px"
+    >
+      <el-form
+        ref="formRef"
+        :model="checkoutForm"
+        :rules="checkoutRules"
+        label-width="80px"
+      >
+        <el-form-item
+          label="收货地址"
+          prop="address"
+        >
+          <el-input
+            v-model="checkoutForm.address"
+            placeholder="请输入收货地址"
+          />
         </el-form-item>
-        <el-form-item label="联系电话" prop="phone">
-          <el-input v-model="checkoutForm.phone" placeholder="请输入手机号" />
+        <el-form-item
+          label="联系电话"
+          prop="phone"
+        >
+          <el-input
+            v-model="checkoutForm.phone"
+            placeholder="请输入手机号"
+          />
         </el-form-item>
       </el-form>
       <template #footer>
         <el-button @click="dialogVisible = false">取消</el-button>
-        <el-button type="primary" :loading="submitting" @click="doCreateOrder">确认下单</el-button>
+        <el-button
+          type="primary"
+          :loading="submitting"
+          @click="doCreateOrder"
+          >确认下单</el-button
+        >
       </template>
     </el-dialog>
   </div>

@@ -4,28 +4,58 @@
       <h1 class="order-list__title">我的订单</h1>
 
       <!-- 加载中 -->
-      <div v-if="loading" v-loading="loading" class="order-list__loading" />
+      <div
+        v-if="loading"
+        v-loading="loading"
+        class="order-list__loading"
+      />
 
       <!-- 加载失败 -->
-      <el-empty v-else-if="error" description="加载失败，请重试">
-        <el-button type="primary" @click="loadOrders">重新加载</el-button>
+      <el-empty
+        v-else-if="error"
+        description="加载失败，请重试"
+      >
+        <el-button
+          type="primary"
+          @click="loadOrders"
+          >重新加载</el-button
+        >
       </el-empty>
 
       <!-- 空状态 -->
-      <el-empty v-else-if="orders.length === 0" description="暂无订单" />
+      <el-empty
+        v-else-if="orders.length === 0"
+        description="暂无订单"
+      />
 
       <!-- 订单列表 -->
-      <div v-else class="order-list__items">
-        <div v-for="order in orders" :key="order.id" class="order-card">
-          <router-link :to="`/orders/${order.id}`" class="order-card__header">
+      <div
+        v-else
+        class="order-list__items"
+      >
+        <div
+          v-for="order in orders"
+          :key="order.id"
+          class="order-card"
+        >
+          <router-link
+            :to="`/orders/${order.id}`"
+            class="order-card__header"
+          >
             <span class="order-card__id">订单号：{{ order.id }}</span>
-            <el-tag :type="statusType(order.status)" size="small">{{
-              statusLabel(order.status)
-            }}</el-tag>
+            <el-tag
+              :type="statusType(order.status)"
+              size="small"
+              >{{ statusLabel(order.status) }}</el-tag
+            >
           </router-link>
 
           <div class="order-card__body">
-            <div v-for="item in order.items" :key="item.id" class="order-card__item">
+            <div
+              v-for="item in order.items"
+              :key="item.id"
+              class="order-card__item"
+            >
               <span class="order-card__item-name">{{ item.product?.name }}</span>
               <span class="order-card__item-meta">× {{ item.quantity }}</span>
               <span class="order-card__item-price">¥{{ item.price }}</span>

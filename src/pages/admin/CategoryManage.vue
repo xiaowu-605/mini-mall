@@ -2,28 +2,68 @@
   <div class="admin-page">
     <div class="admin-page__header">
       <h2>分类管理</h2>
-      <el-button type="primary" @click="openAddDialog">新增分类</el-button>
+      <el-button
+        type="primary"
+        @click="openAddDialog"
+        >新增分类</el-button
+      >
     </div>
 
-    <el-table :data="categories" border stripe v-loading="loading">
-      <el-table-column prop="id" label="ID" width="80" />
-      <el-table-column prop="name" label="名称" min-width="200" />
-      <el-table-column label="商品数" width="100">
+    <el-table
+      :data="categories"
+      border
+      stripe
+      v-loading="loading"
+    >
+      <el-table-column
+        prop="id"
+        label="ID"
+        width="80"
+      />
+      <el-table-column
+        prop="name"
+        label="名称"
+        min-width="200"
+      />
+      <el-table-column
+        label="商品数"
+        width="100"
+      >
         <template #default="{ row }">{{ row._count?.products || 0 }}</template>
       </el-table-column>
-      <el-table-column label="操作" width="100">
+      <el-table-column
+        label="操作"
+        width="100"
+      >
         <template #default="{ row }">
-          <el-button size="small" type="danger" @click="doDelete(row.id, row.name)">删除</el-button>
+          <el-button
+            size="small"
+            type="danger"
+            @click="doDelete(row.id, row.name)"
+            >删除</el-button
+          >
         </template>
       </el-table-column>
     </el-table>
 
     <!-- 新增弹窗 -->
-    <el-dialog v-model="dialogVisible" title="新增分类" width="400px">
-      <el-input v-model="newName" placeholder="请输入分类名称" />
+    <el-dialog
+      v-model="dialogVisible"
+      title="新增分类"
+      width="400px"
+    >
+      <el-input
+        v-model="newName"
+        placeholder="请输入分类名称"
+      />
       <template #footer>
         <el-button @click="dialogVisible = false">取消</el-button>
-        <el-button type="primary" :loading="submitting" @click="doCreate">确定</el-button>
+        <el-button
+          type="primary"
+          :loading="submitting"
+          @click="doCreate"
+          >确定</el-button
+        >
       </template>
     </el-dialog>
   </div>

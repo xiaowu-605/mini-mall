@@ -2,7 +2,10 @@
   <div class="admin-layout">
     <el-container class="admin-layout__container">
       <!-- 侧边栏 -->
-      <el-aside width="200px" class="admin-layout__aside">
+      <el-aside
+        width="200px"
+        class="admin-layout__aside"
+      >
         <div class="admin-layout__logo">
           <router-link to="/admin">Mini-Mall 后台</router-link>
         </div>

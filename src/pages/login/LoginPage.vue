@@ -10,11 +10,21 @@
         label-position="top"
         @submit.prevent="onSubmit"
       >
-        <el-form-item label="邮箱" prop="email">
-          <el-input v-model="form.email" type="email" placeholder="请输入邮箱" />
+        <el-form-item
+          label="邮箱"
+          prop="email"
+        >
+          <el-input
+            v-model="form.email"
+            type="email"
+            placeholder="请输入邮箱"
+          />
         </el-form-item>
 
-        <el-form-item label="密码" prop="password">
+        <el-form-item
+          label="密码"
+          prop="password"
+        >
           <el-input
             v-model="form.password"
             type="password"
@@ -24,14 +34,23 @@
         </el-form-item>
 
         <el-form-item>
-          <el-button type="primary" class="auth-card__submit" :loading="loading" @click="onSubmit">
+          <el-button
+            type="primary"
+            class="auth-card__submit"
+            :loading="loading"
+            @click="onSubmit"
+          >
             登录
           </el-button>
         </el-form-item>
       </el-form>
 
       <p class="auth-card__tip">
-        还没有账号？<router-link to="/register" class="auth-card__link">立即注册</router-link>
+        还没有账号？<router-link
+          to="/register"
+          class="auth-card__link"
+          >立即注册</router-link
+        >
       </p>
     </div>
   </div>

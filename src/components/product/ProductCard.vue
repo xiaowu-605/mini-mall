@@ -1,16 +1,37 @@
 <template>
-  <router-link :to="`/products/${product.id}`" class="product-card">
-    <el-card :body-style="{ padding: '0' }" shadow="hover">
+  <router-link
+    :to="`/products/${product.id}`"
+    class="product-card"
+  >
+    <el-card
+      :body-style="{ padding: '0' }"
+      shadow="hover"
+    >
       <div class="product-card__image">
-        <img :src="product.image || '/placeholder.svg'" :alt="product.name" />
+        <img
+          :src="product.image || '/placeholder.svg'"
+          :alt="product.name"
+        />
       </div>
       <div class="product-card__info">
-        <el-tag size="small" type="info">{{ product.category?.name || '未分类' }}</el-tag>
+        <el-tag
+          size="small"
+          type="info"
+          >{{ product.category?.name || '未分类' }}</el-tag
+        >
         <h3 class="product-card__name">{{ product.name }}</h3>
         <div class="product-card__footer">
           <span class="product-card__price">¥{{ product.price }}</span>
-          <span v-if="product.stock === 0" class="product-card__stock--sold-out">已售罄</span>
-          <span v-else class="product-card__stock">库存 {{ product.stock }}</span>
+          <span
+            v-if="product.stock === 0"
+            class="product-card__stock--sold-out"
+            >已售罄</span
+          >
+          <span
+            v-else
+            class="product-card__stock"
+            >库存 {{ product.stock }}</span
+          >
         </div>
       </div>
     </el-card>

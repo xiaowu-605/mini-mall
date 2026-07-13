@@ -30,9 +30,18 @@ api.interceptors.response.use(
 
     const { status, data } = error.response
 
+    const url = error.config?.url || ''
+
     switch (status) {
       case 401:
-        // session 过期，自动登出
+        // /auth/me 返回 401 表示未登录（游客正常状态），静默处理
+        if (url === '/auth/me') break
+        // /auth/login 返回 401 是密码错误等业务错误，展示服务端消息
+        if (url === '/auth/login') {
+          ElMessage.error(data?.error || '邮箱或密码不正确')
+          break
+        }
+        // 其他接口 401：session 过期，自动登出
         import('@/stores/auth').then(({ useAuthStore }) => {
           useAuthStore()
             .logout()

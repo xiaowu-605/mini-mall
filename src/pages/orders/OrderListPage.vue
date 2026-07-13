@@ -56,7 +56,9 @@
               :key="item.id"
               class="order-card__item"
             >
-              <span class="order-card__item-name">{{ item.product?.name }}</span>
+              <span class="order-card__item-name">{{
+                item.product?.name
+              }}</span>
               <span class="order-card__item-meta">× {{ item.quantity }}</span>
               <span class="order-card__item-price">¥{{ item.price }}</span>
             </div>
@@ -66,7 +68,9 @@
             <span class="order-card__total"
               >合计：<strong>¥{{ order.discountedTotal }}</strong></span
             >
-            <span class="order-card__time">{{ formatTime(order.createdAt) }}</span>
+            <span class="order-card__time">{{
+              formatTime(order.createdAt)
+            }}</span>
           </div>
         </div>
       </div>

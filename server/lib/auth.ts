@@ -13,13 +13,18 @@ export async function hashPassword(password: string): Promise<string> {
 }
 
 /** 验证密码 */
-export async function verifyPassword(password: string, hash: string): Promise<boolean> {
+export async function verifyPassword(
+  password: string,
+  hash: string,
+): Promise<boolean> {
   return bcrypt.compare(password, hash)
 }
 
 /** 签发 JWT 并写入 httpOnly Cookie */
 export function setSession(res: Response, userId: number, role: string): void {
-  const token = jwt.sign({ userId, role }, JWT_SECRET, { expiresIn: TOKEN_EXPIRY })
+  const token = jwt.sign({ userId, role }, JWT_SECRET, {
+    expiresIn: TOKEN_EXPIRY,
+  })
   res.cookie(COOKIE_NAME, token, {
     httpOnly: true,
     sameSite: 'lax',
@@ -30,7 +35,9 @@ export function setSession(res: Response, userId: number, role: string): void {
 }
 
 /** 从 Cookie 读取并验证 JWT，返回 payload 或 null */
-export function getSession(req: Request): { userId: number; role: string } | null {
+export function getSession(
+  req: Request,
+): { userId: number; role: string } | null {
   try {
     const token = req.cookies?.[COOKIE_NAME]
     if (!token) return null

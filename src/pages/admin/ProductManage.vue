@@ -194,7 +194,10 @@ function openDialog(product: Product | null) {
 async function loadData() {
   loading.value = true
   try {
-    const [pRes, cRes] = await Promise.all([getAdminProducts(), getAdminCategories()])
+    const [pRes, cRes] = await Promise.all([
+      getAdminProducts(),
+      getAdminCategories(),
+    ])
     products.value = pRes.data
     categories.value = cRes.data
   } catch (e) {

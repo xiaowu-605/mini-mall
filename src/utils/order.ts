@@ -11,7 +11,9 @@ export function statusLabel(status: string): string {
 }
 
 /** 订单状态 → Element Plus Tag type */
-export function statusType(status: string): '' | 'success' | 'warning' | 'info' | 'danger' {
+export function statusType(
+  status: string,
+): '' | 'success' | 'warning' | 'info' | 'danger' {
   const map: Record<string, '' | 'success' | 'warning' | 'info' | 'danger'> = {
     pending: 'warning',
     paid: 'success',

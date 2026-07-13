@@ -46,7 +46,13 @@ router.put('/:id', async (req: Request, res: Response) => {
     }
 
     const { status } = req.body
-    const validStatuses = ['pending', 'paid', 'shipped', 'completed', 'cancelled']
+    const validStatuses = [
+      'pending',
+      'paid',
+      'shipped',
+      'completed',
+      'cancelled',
+    ]
     if (!validStatuses.includes(status)) {
       res.status(400).json({ error: '无效的状态' })
       return

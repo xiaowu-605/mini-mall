@@ -78,7 +78,8 @@ router.beforeEach(async (to, _from, next) => {
   const auth = useAuthStore()
 
   // 首次加载时获取，之前登录过但被 401 清空后重试，或短暂失败后重试
-  const needFetch = !initialAuthDone || (!auth.user && (hadUser || fetchFailCount < 3))
+  const needFetch =
+    !initialAuthDone || (!auth.user && (hadUser || fetchFailCount < 3))
   if (needFetch) {
     initialAuthDone = true
     await auth.fetchUser()

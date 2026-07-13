@@ -72,7 +72,11 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
-import { getAdminCategories, createAdminCategory, deleteAdminCategory } from '@/api/admin'
+import {
+  getAdminCategories,
+  createAdminCategory,
+  deleteAdminCategory,
+} from '@/api/admin'
 import { useDeleteConfirm } from '@/hooks/useDeleteConfirm'
 
 const { confirm: confirmDelete } = useDeleteConfirm()

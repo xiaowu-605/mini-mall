@@ -55,7 +55,9 @@
             >
               {{ item.product?.name }}
             </router-link>
-            <span class="cart-item__price">¥{{ item.product?.price?.toFixed(2) }}</span>
+            <span class="cart-item__price"
+              >¥{{ item.product?.price?.toFixed(2) }}</span
+            >
           </div>
 
           <!-- 数量控制 -->
@@ -241,7 +243,10 @@ async function doCreateOrder() {
 
   submitting.value = true
   try {
-    const orderParams = { address: checkoutForm.address, phone: checkoutForm.phone }
+    const orderParams = {
+      address: checkoutForm.address,
+      phone: checkoutForm.phone,
+    }
     const res = await createOrder(orderParams)
     if (!res.data?.id) {
       ElMessage.error('下单失败')

@@ -67,7 +67,11 @@
                 class="text"
                 :class="product.stock > 0 ? 'text--in' : 'text--out'"
               >
-                {{ product.stock > 0 ? `有货（库存 ${product.stock} 件）` : '已售罄' }}
+                {{
+                  product.stock > 0
+                    ? `有货（库存 ${product.stock} 件）`
+                    : '已售罄'
+                }}
               </span>
             </div>
 

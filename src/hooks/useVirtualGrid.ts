@@ -1,4 +1,13 @@
-import { ref, computed, onMounted, onUnmounted, watch, toValue, type Ref, type MaybeRef } from 'vue'
+import {
+  ref,
+  computed,
+  onMounted,
+  onUnmounted,
+  watch,
+  toValue,
+  type Ref,
+  type MaybeRef,
+} from 'vue'
 
 /**
  * 虚拟网格滚动 composable
@@ -34,11 +43,17 @@ export function useVirtualGrid(
     return (containerWidth.value - (n - 1) * gap) / n
   })
 
-  const estimatedRowHeight = computed(() => itemWidth.value + estimatedInfoHeight + gap)
+  const estimatedRowHeight = computed(
+    () => itemWidth.value + estimatedInfoHeight + gap,
+  )
 
-  const rowHeight = computed(() => measuredRowHeight.value || estimatedRowHeight.value)
+  const rowHeight = computed(
+    () => measuredRowHeight.value || estimatedRowHeight.value,
+  )
 
-  const totalRows = computed(() => Math.ceil(items.value.length / itemsPerRow.value))
+  const totalRows = computed(() =>
+    Math.ceil(items.value.length / itemsPerRow.value),
+  )
 
   const totalHeight = computed(() => totalRows.value * rowHeight.value)
 
@@ -46,7 +61,8 @@ export function useVirtualGrid(
 
   function updateGridTop() {
     if (containerRef.value) {
-      gridTop.value = containerRef.value.getBoundingClientRect().top + window.scrollY
+      gridTop.value =
+        containerRef.value.getBoundingClientRect().top + window.scrollY
     }
   }
 
@@ -57,8 +73,14 @@ export function useVirtualGrid(
   })
 
   const endRow = computed(() => {
-    const visibleBot = Math.max(0, scrollY.value + viewportHeight.value - gridTop.value)
-    return Math.min(totalRows.value, Math.ceil(visibleBot / rowHeight.value) + overscan)
+    const visibleBot = Math.max(
+      0,
+      scrollY.value + viewportHeight.value - gridTop.value,
+    )
+    return Math.min(
+      totalRows.value,
+      Math.ceil(visibleBot / rowHeight.value) + overscan,
+    )
   })
 
   const visibleRows = computed(() => {
@@ -80,7 +102,8 @@ export function useVirtualGrid(
     if (!containerRef.value) return
     const rows = containerRef.value.querySelectorAll('[data-vgrid-row]')
     if (rows.length < 2) return
-    const h = (rows[1] as HTMLElement).offsetTop - (rows[0] as HTMLElement).offsetTop
+    const h =
+      (rows[1] as HTMLElement).offsetTop - (rows[0] as HTMLElement).offsetTop
     if (h > 20) measuredRowHeight.value = h
   }
 

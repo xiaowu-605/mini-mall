@@ -38,7 +38,9 @@
         <!-- 订单状态 -->
         <div class="order-detail__header">
           <h1 class="order-detail__title">订单 #{{ order.id }}</h1>
-          <el-tag :type="statusType(order.status)">{{ statusLabel(order.status) }}</el-tag>
+          <el-tag :type="statusType(order.status)">{{
+            statusLabel(order.status)
+          }}</el-tag>
         </div>
 
         <!-- 收货信息 -->
@@ -64,7 +66,9 @@
               {{ item.product.name }}
             </router-link>
             <span class="order-detail__item-meta">× {{ item.quantity }}</span>
-            <span class="order-detail__item-price">¥{{ item.price * item.quantity }}</span>
+            <span class="order-detail__item-price"
+              >¥{{ item.price * item.quantity }}</span
+            >
           </div>
         </div>
 
@@ -87,7 +91,9 @@
             </div>
             <div class="order-detail__row order-detail__row--total">
               <span>实付金额</span>
-              <span class="order-detail__final">¥{{ order.discountedTotal }}</span>
+              <span class="order-detail__final"
+                >¥{{ order.discountedTotal }}</span
+              >
             </div>
           </div>
         </div>

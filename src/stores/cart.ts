@@ -9,7 +9,9 @@ export const useCartStore = defineStore('cart', () => {
   const loading = ref(false)
 
   // 购物车商品总数
-  const count = computed(() => items.value.reduce((sum, item) => sum + item.quantity, 0))
+  const count = computed(() =>
+    items.value.reduce((sum, item) => sum + item.quantity, 0),
+  )
 
   // 总价（原价合计）
   const totalPrice = computed(() =>

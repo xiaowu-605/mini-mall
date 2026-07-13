@@ -32,14 +32,18 @@
         width="120"
       >
         <template #default="{ row }">
-          <el-tag :type="statusType(row.status)">{{ statusLabel(row.status) }}</el-tag>
+          <el-tag :type="statusType(row.status)">{{
+            statusLabel(row.status)
+          }}</el-tag>
         </template>
       </el-table-column>
       <el-table-column
         label="收货信息"
         min-width="150"
       >
-        <template #default="{ row }">{{ row.address }} / {{ row.phone }}</template>
+        <template #default="{ row }"
+          >{{ row.address }} / {{ row.phone }}</template
+        >
       </el-table-column>
       <el-table-column
         label="时间"

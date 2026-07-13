@@ -1,5 +1,11 @@
 import { Router, Request, Response } from 'express'
-import { hashPassword, verifyPassword, setSession, getCurrentUser, clearSession } from '../lib/auth'
+import {
+  hashPassword,
+  verifyPassword,
+  setSession,
+  getCurrentUser,
+  clearSession,
+} from '../lib/auth'
 import { prisma } from '../prisma'
 
 const router = Router()

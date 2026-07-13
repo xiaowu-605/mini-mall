@@ -47,7 +47,9 @@ router.post('/', async (req: Request, res: Response) => {
     }
 
     // 检查商品是否存在且有库存
-    const product = await prisma.product.findUnique({ where: { id: productId } })
+    const product = await prisma.product.findUnique({
+      where: { id: productId },
+    })
     if (!product) {
       res.status(404).json({ error: '商品不存在' })
       return
@@ -124,7 +126,9 @@ router.put('/:id', async (req: Request, res: Response) => {
 
     // 检查库存
     if (quantity > cartItem.product.stock) {
-      res.status(400).json({ error: `库存不足，当前库存 ${cartItem.product.stock} 件` })
+      res
+        .status(400)
+        .json({ error: `库存不足，当前库存 ${cartItem.product.stock} 件` })
       return
     }
 

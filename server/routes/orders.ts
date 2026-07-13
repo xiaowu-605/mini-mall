@@ -47,7 +47,10 @@ router.post('/', async (req: Request, res: Response) => {
     }
 
     // 计算金额
-    const total = cartItems.reduce((sum, item) => sum + item.product.price * item.quantity, 0)
+    const total = cartItems.reduce(
+      (sum, item) => sum + item.product.price * item.quantity,
+      0,
+    )
     const discount = getMemberDiscount(user.memberLevel)
     const discountedTotal = Math.round(total * discount * 100) / 100
 
@@ -67,7 +70,10 @@ router.post('/', async (req: Request, res: Response) => {
         }
       }
       if (insufficient.length > 0) {
-        throw { status: 400, message: `以下商品库存不足：${insufficient.join('、')}` }
+        throw {
+          status: 400,
+          message: `以下商品库存不足：${insufficient.join('、')}`,
+        }
       }
 
       // 创建订单
@@ -214,7 +220,8 @@ router.put('/:id', async (req: Request, res: Response) => {
           select: { totalSpent: true, memberLevel: true },
         })
 
-        const newTotalSpent = (currentUser?.totalSpent || 0) + paid.discountedTotal
+        const newTotalSpent =
+          (currentUser?.totalSpent || 0) + paid.discountedTotal
         const newLevel = calcMemberLevel(newTotalSpent)
         const finalLevel = Math.max(currentUser?.memberLevel || 0, newLevel)
 

@@ -29,7 +29,12 @@ router.post('/', async (req: Request, res: Response) => {
       res.status(400).json({ error: '请输入商品名称' })
       return
     }
-    if (price == null || price === '' || isNaN(parseFloat(price)) || !isFinite(Number(price))) {
+    if (
+      price == null ||
+      price === '' ||
+      isNaN(parseFloat(price)) ||
+      !isFinite(Number(price))
+    ) {
       res.status(400).json({ error: '请输入有效价格' })
       return
     }
@@ -40,7 +45,9 @@ router.post('/', async (req: Request, res: Response) => {
 
     // 校验分类是否存在
     const parsedCategoryId = parseInt(categoryId)
-    const category = await prisma.category.findUnique({ where: { id: parsedCategoryId } })
+    const category = await prisma.category.findUnique({
+      where: { id: parsedCategoryId },
+    })
     if (!category) {
       res.status(400).json({ error: '所选分类不存在' })
       return
@@ -87,7 +94,11 @@ router.put('/:id', async (req: Request, res: Response) => {
     }
     if (description !== undefined) data.description = description
     if (price !== undefined) {
-      if (price === '' || isNaN(parseFloat(price)) || !isFinite(Number(price))) {
+      if (
+        price === '' ||
+        isNaN(parseFloat(price)) ||
+        !isFinite(Number(price))
+      ) {
         res.status(400).json({ error: '请输入有效价格' })
         return
       }

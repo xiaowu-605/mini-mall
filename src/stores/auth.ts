@@ -17,7 +17,11 @@ export const useAuthStore = defineStore('auth', () => {
   function hasPermission(perm: string): boolean {
     if (!user.value) return false
     const raw = user.value.permissions
-    const perms: string[] = raw ? (typeof raw === 'string' ? JSON.parse(raw) : raw) : []
+    const perms: string[] = raw
+      ? typeof raw === 'string'
+        ? JSON.parse(raw)
+        : raw
+      : []
     if (perms.includes('super_admin')) return true
     return perms.includes(perm)
   }
@@ -49,5 +53,13 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
-  return { user, loading, isLoggedIn, isAdmin, hasPermission, fetchUser, logout }
+  return {
+    user,
+    loading,
+    isLoggedIn,
+    isAdmin,
+    hasPermission,
+    fetchUser,
+    logout,
+  }
 })

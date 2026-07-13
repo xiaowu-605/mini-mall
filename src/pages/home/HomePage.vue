@@ -159,7 +159,9 @@ watch(nearEnd, (val) => {
 })
 
 onMounted(async () => {
-  const stickyEl = document.querySelector('.home-page__sticky') as HTMLElement | null
+  const stickyEl = document.querySelector(
+    '.home-page__sticky',
+  ) as HTMLElement | null
   if (stickyEl) {
     stickyHeight.value = stickyEl.offsetHeight + 56
   }
@@ -216,7 +218,9 @@ async function loadFirstPage() {
     loading.value = false
   }
   await nextTick()
-  await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)))
+  await new Promise((r) =>
+    requestAnimationFrame(() => requestAnimationFrame(r)),
+  )
   calibrate()
 }
 

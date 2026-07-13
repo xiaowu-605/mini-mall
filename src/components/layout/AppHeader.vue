@@ -78,7 +78,13 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
 import { watch } from 'vue'
-import { ShoppingCart, Tickets, User, UserFilled, ArrowDown } from '@element-plus/icons-vue'
+import {
+  ShoppingCart,
+  Tickets,
+  User,
+  UserFilled,
+  ArrowDown,
+} from '@element-plus/icons-vue'
 import { useAuthStore } from '@/stores/auth'
 import { useCartStore } from '@/stores/cart'
 import { ElMessage } from 'element-plus'

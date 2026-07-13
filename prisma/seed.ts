@@ -3,12 +3,38 @@ import bcrypt from 'bcryptjs'
 
 const prisma = new PrismaClient()
 
+/** 调色板：15 组主色 + 辅色，用于生成多样化的产品图 */
+const PALETTE: [string, string][] = [
+  ['#5B8DEF', '#7EB6FF'],
+  ['#F5A623', '#FFBE5C'],
+  ['#4A90D9', '#6DB3F2'],
+  ['#E8635A', '#FF8A82'],
+  ['#7B68EE', '#A79AFF'],
+  ['#FF6B6B', '#FF9E9E'],
+  ['#4ECDC4', '#7EDDD6'],
+  ['#45B7D1', '#7ECFE0'],
+  ['#F7DC6F', '#FFF3A0'],
+  ['#3FB984', '#76D4A8'],
+  ['#E8964A', '#F5B87D'],
+  ['#FFB347', '#FFCE80'],
+  ['#6C5CE7', '#A79AFF'],
+  ['#FD79A8', '#FEA8C9'],
+  ['#00B894', '#55EFC4'],
+]
+
+/** SVG 模板列表 */
+const SVG_TYPES = [
+  'keyboard', 'headphone', 'monitor', 'speaker', 'mouse',
+  'sneaker', 'tshirt', 'jacket', 'jeans',
+  'book', 'lamp', 'cup', 'cushion',
+]
+
 /** 生成卡通产品 SVG（400×400 扁平风格） */
 function productSvg(type: string, primaryColor: string, accentColor: string): string {
   const svgMap: Record<string, string> = {
     keyboard: `<rect x="60" y="120" rx="12" width="280" height="160" fill="${primaryColor}"/>
       <rect x="76" y="136" rx="4" width="248" height="128" fill="${accentColor}" opacity="0.3"/>
-      <g fill="${primaryColor}" opacity="0.6">${Array.from({length:3},(_,r)=>Array.from({length:6},(_,c)=>`<rect x="${80+c*42}" y="${152+r*38}" rx="3" width="32" height="28"/>`).join('')).join('')}</g>
+      <g fill="${primaryColor}" opacity="0.6">${Array.from({ length: 3 }, (_, r) => Array.from({ length: 6 }, (_, c) => `<rect x="${80 + c * 42}" y="${152 + r * 38}" rx="3" width="32" height="28"/>`).join('')).join('')}</g>
       <circle cx="340" cy="260" r="12" fill="${primaryColor}" opacity="0.4"/>
       <circle cx="340" cy="290" r="12" fill="${primaryColor}" opacity="0.4"/>`,
     headphone: `<ellipse cx="120" cy="200" rx="70" ry="80" fill="${primaryColor}"/>
@@ -101,27 +127,41 @@ function svgDataUri(svg: string): string {
   return `data:image/svg+xml,${encodeURIComponent(svg.replace(/\s+/g, ' ').trim())}`
 }
 
-// 产品图片配置：[svgType, primaryColor, accentColor]
-const productImages: Record<string, [string, string, string]> = {
-  '机械键盘 87键 RGB背光': ['keyboard', '#5B8DEF', '#7EB6FF'],
-  '蓝牙降噪耳机': ['headphone', '#F5A623', '#FFBE5C'],
-  '27英寸 4K 显示器': ['monitor', '#4A90D9', '#6DB3F2'],
-  '便携式蓝牙音箱': ['speaker', '#E8635A', '#FF8A82'],
-  '无线充电鼠标': ['mouse', '#7B68EE', '#A79AFF'],
-  '休闲运动鞋 男女同款': ['sneaker', '#FF6B6B', '#FF9E9E'],
-  '纯棉短袖T恤': ['tshirt', '#4ECDC4', '#7EDDD6'],
-  '轻薄羽绒服': ['jacket', '#45B7D1', '#7ECFE0'],
-  '牛仔裤男 弹力修身': ['jeans', '#5B8DEF', '#8DB3F5'],
-  'JavaScript高级程序设计（第4版）': ['book', '#F7DC6F', '#FFF3A0'],
-  '深入浅出Vue.js': ['book', '#3FB984', '#76D4A8'],
-  '设计模式：可复用面向对象软件的基础': ['book', '#E8964A', '#F5B87D'],
-  '北欧风台灯 护眼LED': ['lamp', '#FFB347', '#FFCE80'],
-  '真空保温杯 500ml': ['cup', '#6C5CE7', '#A79AFF'],
-  '记忆棉坐垫 办公室靠垫': ['cushion', '#FD79A8', '#FEA8C9'],
+/** 产品名称词库 */
+const ADJECTIVES = ['高端', '便携', '无线', '智能', '经典', '时尚', '简约', '旗舰', '超薄', '静音',
+  '多功能', '专业', '迷你', '大容量', '快充', '防滑', '环保', '复古', '北欧', '人体工学']
+const DIGITAL_NOUNS = ['机械键盘', '蓝牙耳机', '显示器', '音箱', '鼠标', '充电器', '数据线', 'U盘', '摄像头', '路由器',
+  '移动电源', '平板支架', '读卡器', '拓展坞', '麦克风', '手写板', '智能手表', '运动相机', '无人机', '投影仪']
+const CLOTHING_NOUNS = ['T恤', '衬衫', '卫衣', '夹克', '休闲裤', '运动鞋', '羽绒服', '连衣裙', '短裤', '风衣',
+  '针织衫', '牛仔裤', '棉服', '马甲', '西装', '棒球帽', '围巾', '手套', '袜子', '背包']
+const BOOK_NOUNS = ['JavaScript高级编程', '深入理解计算机系统', '算法导论', '设计模式精解', 'Python机器学习',
+  '数据结构实战', '操作系统原理', '网络协议详解', '数据库系统', '编译器设计',
+  '人工智能导论', '前端工程化', '微服务架构', '云原生应用', '区块链技术',
+  'Rust编程指南', 'Go语言实战', 'Kubernetes实践', 'Linux内核分析', '分布式系统设计']
+const HOME_NOUNS = ['台灯', '保温杯', '坐垫', '收纳盒', '香薰机', '加湿器', '电风扇', '吹风机', '毛巾套装', '拖鞋',
+  '挂钟', '花瓶', '地毯', '抱枕', '餐具套装', '水壶', '置物架', '窗帘', '瑜伽垫', '体重秤']
+
+/** 按分类生成产品名称 */
+function productName(cat: string, i: number): string {
+  const adj = ADJECTIVES[i % ADJECTIVES.length]
+  let nouns: string[]
+  switch (cat) {
+    case '数码产品': nouns = DIGITAL_NOUNS; break
+    case '服装鞋帽': nouns = CLOTHING_NOUNS; break
+    case '图书音像': nouns = BOOK_NOUNS; break
+    default: nouns = HOME_NOUNS
+  }
+  return `${adj}${nouns[i % nouns.length]}`
+}
+
+/** 生成描述 */
+function productDesc(cat: string, i: number): string {
+  const prefix = cat === '图书音像' ? '经典畅销书籍，内容翔实，案例丰富，' : '品质优良，设计精美，'
+  return `${prefix}编号#${i + 1}，${cat}类热门商品，值得信赖。`
 }
 
 async function main() {
-  console.log('开始填充种子数据...')
+  console.log('开始填充种子数据…')
 
   // 创建管理员
   const admin = await prisma.user.upsert({
@@ -137,59 +177,52 @@ async function main() {
   })
   console.log(`管理员账号: ${admin.email} / admin123`)
 
-  // 创建分类（upsert 避免重复执行报错）
+  // 创建分类
   const categoryNames = ['数码产品', '服装鞋帽', '图书音像', '家居生活']
-  const categories = []
+  const categoryMap: Record<string, number> = {}
   for (const name of categoryNames) {
     const cat = await prisma.category.upsert({
       where: { name },
       update: {},
       create: { name },
     })
-    categories.push(cat)
+    categoryMap[name] = cat.id
   }
+  console.log(`创建了 ${categoryNames.length} 个分类`)
 
-  console.log(`创建了 ${categories.length} 个分类`)
-
-  // 商品数据
-  const products = [
-    // 数码产品
-    { name: '机械键盘 87键 RGB背光', description: 'Cherry MX 青轴，全键无冲，铝合金面板，87键紧凑布局。', price: 299, stock: 50, categoryId: categories[0].id },
-    { name: '蓝牙降噪耳机', description: '主动降噪，40小时续航，蓝牙5.3，支持LDAC高清音频。', price: 599, stock: 30, categoryId: categories[0].id },
-    { name: '27英寸 4K 显示器', description: 'IPS面板，100% sRGB，Type-C 65W充电，旋转升降支架。', price: 1899, stock: 15, categoryId: categories[0].id },
-    { name: '便携式蓝牙音箱', description: 'IPX7防水，20小时续航，30W大功率，支持TWS串联。', price: 199, stock: 80, categoryId: categories[0].id },
-    { name: '无线充电鼠标', description: '人体工学设计，静音按键，4000CPI，Type-C快充。', price: 89, stock: 120, categoryId: categories[0].id },
-
-    // 服装鞋帽
-    { name: '休闲运动鞋 男女同款', description: '飞织鞋面，轻盈透气，EVA缓震中底，橡胶防滑大底。', price: 259, stock: 200, categoryId: categories[1].id },
-    { name: '纯棉短袖T恤', description: '100%新疆长绒棉，重磅220g，宽松版型，不易变形。', price: 69, stock: 500, categoryId: categories[1].id },
-    { name: '轻薄羽绒服', description: '90%白鹅绒，蓬松度700+，可收纳设计，防泼水面料。', price: 459, stock: 60, categoryId: categories[1].id },
-    { name: '牛仔裤男 弹力修身', description: '新疆棉混纺，微弹力面料，经典五袋款，四季可穿。', price: 159, stock: 180, categoryId: categories[1].id },
-
-    // 图书音像
-    { name: 'JavaScript高级程序设计（第4版）', description: '前端开发红宝书，全面覆盖ES6+语法、DOM、BOM、事件、Ajax等核心知识。', price: 99, stock: 300, categoryId: categories[2].id },
-    { name: '深入浅出Vue.js', description: '从响应式原理到虚拟DOM，全面解析Vue.js内部实现机制。', price: 79, stock: 250, categoryId: categories[2].id },
-    { name: '设计模式：可复用面向对象软件的基础', description: 'GoF经典之作，23种设计模式详细讲解，软件工程师必读。', price: 69, stock: 150, categoryId: categories[2].id },
-
-    // 家居生活
-    { name: '北欧风台灯 护眼LED', description: '三档色温调节，无频闪，无极调光，可折叠设计。', price: 129, stock: 100, categoryId: categories[3].id },
-    { name: '真空保温杯 500ml', description: '316不锈钢内胆，12小时保温，食品级硅胶密封圈。', price: 89, stock: 400, categoryId: categories[3].id },
-    { name: '记忆棉坐垫 办公室靠垫', description: '慢回弹记忆棉，减压护腰，可拆洗外套，防滑底。', price: 119, stock: 150, categoryId: categories[3].id },
-  ]
-
-  // 清理旧数据（按依赖顺序）
+  // 清理旧商品数据（按依赖顺序）
   await prisma.orderItem.deleteMany()
   await prisma.cartItem.deleteMany()
   await prisma.product.deleteMany()
 
-  for (const p of products) {
-    const [svgType, primaryColor, accentColor] = productImages[p.name] || ['book', '#ccc', '#eee']
-    await prisma.product.create({
-      data: {
-        ...p,
-        image: svgDataUri(productSvg(svgType, primaryColor, accentColor)),
-      },
-    })
+  // 生成 1000 条商品（每个分类 250 条）
+  const TOTAL = 1000
+  const PER_CAT = TOTAL / categoryNames.length
+  const products: any[] = []
+
+  for (const catName of categoryNames) {
+    for (let i = 0; i < PER_CAT; i++) {
+      const idx = products.length
+      const [pColor, aColor] = PALETTE[idx % PALETTE.length]
+      const svgType = SVG_TYPES[idx % SVG_TYPES.length]
+      const name = productName(catName, i)
+
+      products.push({
+        name,
+        description: productDesc(catName, i),
+        price: Math.round((19.9 + Math.random() * 980.1) * 100) / 100,
+        stock: Math.floor(Math.random() * 500) + 1,
+        categoryId: categoryMap[catName],
+        image: svgDataUri(productSvg(svgType, pColor, aColor)),
+      })
+    }
+  }
+
+  // 批量插入（SQLite 单次插入过大可能超限，分批 100 条）
+  const BATCH = 100
+  for (let i = 0; i < products.length; i += BATCH) {
+    const chunk = products.slice(i, i + BATCH)
+    await prisma.product.createMany({ data: chunk })
   }
 
   console.log(`创建了 ${products.length} 个商品`)

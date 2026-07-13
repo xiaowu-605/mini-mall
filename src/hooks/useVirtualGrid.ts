@@ -72,6 +72,9 @@ export function useVirtualGrid(
     return items.value.slice(start, start + itemsPerRow.value) as any[]
   }
 
+  /** 是否滚动到了已加载数据的底部附近（需要加载更多） */
+  const nearEnd = computed(() => endRow.value >= totalRows.value - 3)
+
   /** 实测行高：取前两行间距 */
   function calibrate() {
     if (!containerRef.value) return
@@ -146,7 +149,9 @@ export function useVirtualGrid(
     itemsPerRow,
     rowHeight,
     totalHeight,
+    totalRows,
     visibleRows,
+    nearEnd,
     getRowItems,
     calibrate,
     updateGridTop,

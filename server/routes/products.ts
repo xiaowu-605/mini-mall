@@ -9,7 +9,7 @@ router.get('/', async (req: Request, res: Response) => {
     const { search, categoryId, page = '1', pageSize = '9' } = req.query
 
     const pageNum = Math.max(1, parseInt(page as string) || 1)
-    const size = Math.max(1, Math.min(1000, parseInt(pageSize as string) || 9))
+    const size = Math.max(1, Math.min(100, parseInt(pageSize as string) || 9))
     const skip = (pageNum - 1) * size
 
     // 构建查询条件

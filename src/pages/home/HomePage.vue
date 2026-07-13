@@ -53,7 +53,7 @@
         <el-empty description="加载失败，请重试">
           <el-button
             type="primary"
-            @click="loadProducts"
+            @click="loadFirstPage"
           >
             重新加载
           </el-button>
@@ -66,7 +66,7 @@
         <el-empty description="暂无商品" />
       </div>
 
-      <!-- 虚拟滚动：每行独立 absolute 定位，行之间互不影响 -->
+      <!-- 虚拟滚动 -->
       <div
         v-else
         ref="containerRef"
@@ -91,6 +91,14 @@
             />
           </div>
         </div>
+
+        <!-- 底部加载更多提示 -->
+        <div
+          v-if="loadingMore"
+          class="home-page__more"
+        >
+          <span class="home-page__more-text">加载中…</span>
+        </div>
       </div>
     </div>
   </div>
@@ -107,15 +115,22 @@ import ProductCard from '@/components/product/ProductCard.vue'
 import { createDebounce } from '@/utils/debounce'
 import { useVirtualGrid } from '@/hooks/useVirtualGrid'
 
+const PAGE_SIZE = 50
+
 const route = useRoute()
 const router = useRouter()
 
 const products = ref<Product[]>([])
 const categories = ref<Category[]>([])
 const loading = ref(true)
+const loadingMore = ref(false)
 const error = ref(false)
 const searchQuery = ref('')
 const activeCategory = ref<number | null>(null)
+
+/** 分页状态 */
+const currentPage = ref(1)
+const hasMore = ref(true)
 
 const debounce = createDebounce(300)
 let initialLoadDone = false
@@ -128,11 +143,19 @@ const {
   totalHeight,
   visibleRows,
   rowHeight,
+  nearEnd,
   getRowItems,
   calibrate,
   updateGridTop,
 } = useVirtualGrid(products, {
   stickyOffset: stickyHeight,
+})
+
+/** 滚动接近已加载数据底部时，自动加载下一页 */
+watch(nearEnd, (val) => {
+  if (val && hasMore.value && !loadingMore.value) {
+    loadMore()
+  }
 })
 
 onMounted(async () => {
@@ -144,18 +167,14 @@ onMounted(async () => {
   initFromQuery()
   await loadCategories()
   initialLoadDone = true
-  await loadProducts()
-
-  // 等 DOM 渲染 + 浏览器布局完成后再实测行高
-  await nextTick()
-  await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)))
-  calibrate()
+  await loadFirstPage()
 })
 
+/** 筛选变化时重新加载 */
 watch(activeCategory, () => {
   if (!initialLoadDone) return
   updateURL()
-  loadProducts()
+  loadFirstPage()
 })
 
 function initFromQuery() {
@@ -173,18 +192,22 @@ async function loadCategories() {
   }
 }
 
-async function loadProducts() {
+/** 首屏加载 / 筛选重置：清空旧数据，加载第 1 页 */
+async function loadFirstPage() {
   loading.value = true
   error.value = false
+  currentPage.value = 1
+  hasMore.value = true
   try {
-    const productParams = {
+    const params = {
       search: searchQuery.value || undefined,
       categoryId: activeCategory.value ?? undefined,
       page: 1,
-      pageSize: 1000,
+      pageSize: PAGE_SIZE,
     }
-    const res = await getProducts(productParams)
+    const res = await getProducts(params)
     products.value = res.data.data || []
+    hasMore.value = currentPage.value < (res.data.totalPages || 1)
     updateGridTop()
   } catch (e) {
     console.error('加载商品失败:', e)
@@ -197,6 +220,34 @@ async function loadProducts() {
   calibrate()
 }
 
+/** 滚动加载下一页，追加到已有数据 */
+async function loadMore() {
+  if (!hasMore.value || loadingMore.value) return
+  loadingMore.value = true
+  try {
+    const nextPage = currentPage.value + 1
+    const params = {
+      search: searchQuery.value || undefined,
+      categoryId: activeCategory.value ?? undefined,
+      page: nextPage,
+      pageSize: PAGE_SIZE,
+    }
+    const res = await getProducts(params)
+    const newItems = res.data.data || []
+    if (newItems.length > 0) {
+      products.value.push(...newItems)
+      currentPage.value = nextPage
+      hasMore.value = nextPage < (res.data.totalPages || 1)
+    } else {
+      hasMore.value = false
+    }
+  } catch (e) {
+    console.error('加载更多商品失败:', e)
+  } finally {
+    loadingMore.value = false
+  }
+}
+
 function selectCategory(categoryId: number | null) {
   activeCategory.value = categoryId
 }
@@ -204,13 +255,13 @@ function selectCategory(categoryId: number | null) {
 function clearSearch() {
   searchQuery.value = ''
   updateURL()
-  loadProducts()
+  loadFirstPage()
 }
 
 function onSearch() {
   debounce(() => {
     updateURL()
-    loadProducts()
+    loadFirstPage()
   })
 }
 
@@ -285,7 +336,6 @@ function updateURL() {
     padding: 0 @spacing-md @spacing-2xl;
   }
 
-  /* 虚拟滚动容器 */
   &__vgrid {
     position: relative;
   }
@@ -299,7 +349,20 @@ function updateURL() {
   &__grid {
     display: grid;
     gap: @spacing-md;
-    /* grid-template-columns 由 JS 根据容器宽度动态设置 */
+  }
+
+  &__more {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    text-align: center;
+    padding: @spacing-lg 0;
+  }
+
+  &__more-text {
+    font-size: 13px;
+    color: @color-text-muted;
   }
 
   &__loading {

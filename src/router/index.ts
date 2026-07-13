@@ -86,7 +86,8 @@ router.beforeEach(async (to, _from, next) => {
     if (auth.user) {
       hadUser = true
       fetchFailCount = 0
-    } else if (!hadUser) {
+    } else {
+      // 无论是否曾经登录过，fetch 失败都递增计数，防止无限重试
       fetchFailCount++
     }
   }

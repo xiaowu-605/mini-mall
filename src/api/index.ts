@@ -14,6 +14,9 @@ const api = axios.create({
 
 // Session 通过 httpOnly Cookie 自动携带，无需手动设置 header
 
+/** 防止多个并发 401 重复触发 logout */
+let isLoggingOut = false
+
 // 响应拦截器：统一错误处理
 api.interceptors.response.use(
   (response) => response,
@@ -41,13 +44,18 @@ api.interceptors.response.use(
           ElMessage.error(data?.error || '邮箱或密码不正确')
           break
         }
-        // 其他接口 401：session 过期，自动登出
-        import('@/stores/auth').then(({ useAuthStore }) => {
-          useAuthStore()
-            .logout()
-            .catch(() => {})
-        })
-        ElMessage.error('登录已过期，请重新登录')
+        // 其他接口 401：session 过期，自动登出（防重入）
+        if (!isLoggingOut) {
+          isLoggingOut = true
+          ElMessage.error('登录已过期，请重新登录')
+          import('@/stores/auth').then(({ useAuthStore }) => {
+            useAuthStore()
+              .logout()
+              .finally(() => {
+                isLoggingOut = false
+              })
+          })
+        }
         break
       case 403:
         ElMessage.error('暂无权限执行此操作')

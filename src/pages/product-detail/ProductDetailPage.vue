@@ -106,7 +106,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { getProductById } from '@/api/products'
@@ -123,10 +123,16 @@ let loading = ref(true)
 let notFound = ref(false)
 let quantity = ref(1)
 let showCartTip = ref(false)
+let tipTimer: ReturnType<typeof setTimeout> | null = null
 
 /** 页面初始化：加载商品详情 */
 onMounted(() => {
   loadProduct()
+})
+
+/** 清理定时器，防止组件卸载后状态更新 */
+onUnmounted(() => {
+  if (tipTimer) clearTimeout(tipTimer)
 })
 
 /** 加载商品详情 */
@@ -162,8 +168,10 @@ async function addToCart() {
     const addParams = { productId: product.value.id, quantity: quantity.value }
     await cart.add(addParams)
     showCartTip.value = true
-    setTimeout(() => {
+    if (tipTimer) clearTimeout(tipTimer)
+    tipTimer = setTimeout(() => {
       showCartTip.value = false
+      tipTimer = null
     }, 1500)
   } catch (e) {
     console.error(e)

@@ -15,6 +15,10 @@
       stripe
       v-loading="loading"
     >
+      <template #empty>
+        <span v-if="error">加载失败，请刷新重试</span>
+        <span v-else>暂无商品</span>
+      </template>
       <el-table-column
         prop="id"
         label="ID"
@@ -143,6 +147,7 @@ import type { Product } from '@/types'
 let products = ref<Product[]>([])
 let categories = ref<any[]>([])
 let loading = ref(false)
+const error = ref(false)
 let dialogVisible = ref(false)
 let submitting = ref(false)
 const editingProduct = ref<Product | null>(null)
@@ -193,6 +198,7 @@ function openDialog(product: Product | null) {
 /** 加载商品和分类数据 */
 async function loadData() {
   loading.value = true
+  error.value = false
   try {
     const [pRes, cRes] = await Promise.all([
       getAdminProducts(),
@@ -201,6 +207,7 @@ async function loadData() {
     products.value = pRes.data
     categories.value = cRes.data
   } catch (e) {
+    error.value = true
     console.error('加载数据失败:', e)
   } finally {
     loading.value = false

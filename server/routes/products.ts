@@ -16,7 +16,9 @@ router.get('/', async (req: Request, res: Response) => {
     const where: any = {}
 
     if (search) {
-      where.name = { contains: search as string }
+      // 转义 SQL LIKE 通配符，防止 % 和 _ 匹配任意字符
+      const escaped = (search as string).replace(/[%_]/g, '\\$&')
+      where.name = { contains: escaped }
     }
 
     if (categoryId) {

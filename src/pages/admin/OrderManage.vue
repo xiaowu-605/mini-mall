@@ -10,6 +10,10 @@
       stripe
       v-loading="loading"
     >
+      <template #empty>
+        <span v-if="error">加载失败，请刷新重试</span>
+        <span v-else>暂无订单</span>
+      </template>
       <el-table-column
         prop="id"
         label="订单号"
@@ -98,7 +102,7 @@ import { useAsyncData } from '@/hooks/useAsyncData'
 import type { Order } from '@/types'
 
 const orders = ref<Order[]>([])
-const { loading, run } = useAsyncData()
+const { loading, error, run } = useAsyncData()
 
 /** 页面初始化：加载订单列表 */
 onMounted(() => {

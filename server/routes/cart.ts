@@ -55,26 +55,32 @@ router.post('/', async (req: Request, res: Response) => {
       return
     }
 
-    // 查出已有的购物车项
-    const existing = await prisma.cartItem.findUnique({
-      where: { userId_productId: { userId: user.id, productId } },
-    })
+    // 事务内完成读-改-写，防止并发 TOCTOU 导致数量丢失
+    const item = await prisma.$transaction(async (tx) => {
+      const existing = await tx.cartItem.findUnique({
+        where: { userId_productId: { userId: user.id, productId } },
+      })
 
-    const newQuantity = (existing?.quantity || 0) + quantity
-    if (newQuantity > product.stock) {
-      res.status(400).json({ error: `库存不足，当前库存 ${product.stock} 件` })
-      return
-    }
+      const newQuantity = (existing?.quantity || 0) + quantity
+      if (newQuantity > product.stock) {
+        throw { status: 400, message: `库存不足，当前库存 ${product.stock} 件` }
+      }
 
-    const item = await prisma.cartItem.upsert({
-      where: { userId_productId: { userId: user.id, productId } },
-      create: { userId: user.id, productId, quantity },
-      update: { quantity: newQuantity },
-      include: { product: true },
+      return tx.cartItem.upsert({
+        where: { userId_productId: { userId: user.id, productId } },
+        create: { userId: user.id, productId, quantity },
+        update: { quantity: newQuantity },
+        include: { product: true },
+      })
     })
 
     res.status(201).json(item)
-  } catch (error) {
+  } catch (error: any) {
+    // 事务内抛出的业务错误（如库存不足）
+    if (error.status && error.message) {
+      res.status(error.status).json({ error: error.message })
+      return
+    }
     console.error('加入购物车失败:', error)
     res.status(500).json({ error: '加入购物车失败' })
   }

@@ -26,7 +26,8 @@ export function useVirtualGrid(
   const gap = 16
 
   const containerRef = ref<HTMLElement | null>(null)
-  const containerWidth = ref(window.innerWidth > 768 ? 1280 : window.innerWidth)
+  // 初始宽度设为 0，由 ResizeObserver/setupObserver 立即矫正，避免布局跳动
+  const containerWidth = ref(0)
   const scrollY = ref(0)
   const viewportHeight = ref(window.innerHeight)
   const measuredRowHeight = ref(0)
@@ -95,7 +96,9 @@ export function useVirtualGrid(
   }
 
   /** 是否滚动到了已加载数据的底部附近（需要加载更多） */
-  const nearEnd = computed(() => endRow.value >= totalRows.value - 3)
+  const nearEnd = computed(
+    () => totalRows.value > 0 && endRow.value >= totalRows.value - 3,
+  )
 
   /** 实测行高：取前两行间距 */
   function calibrate() {

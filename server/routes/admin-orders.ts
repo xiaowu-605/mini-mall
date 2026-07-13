@@ -1,9 +1,10 @@
 import { Router, Request, Response } from 'express'
-import { requireAdmin } from '../middleware/admin'
+import { requireAdmin, requirePermission } from '../middleware/admin'
 import { prisma } from '../prisma'
 
 const router = Router()
 router.use(requireAdmin)
+router.use(requirePermission('manage_orders'))
 
 // 合法的状态流转：pending → paid → shipped → completed，任意状态 → cancelled
 const VALID_TRANSITIONS: Record<string, string[]> = {
@@ -78,6 +79,34 @@ router.put('/:id', async (req: Request, res: Response) => {
       res.status(400).json({
         error: `不能将订单从「${labels[currentOrder.status] || currentOrder.status}」改为「${labels[status] || status}」`,
       })
+      return
+    }
+
+    // 取消订单时恢复库存（事务保证原子性）
+    if (status === 'cancelled') {
+      const order = await prisma.$transaction(async (tx) => {
+        // 先更新状态，防止并发重复恢复库存
+        const updated = await tx.order.update({
+          where: { id },
+          data: { status: 'cancelled' },
+          include: {
+            user: { select: { id: true, name: true, email: true } },
+            items: { include: { product: true } },
+          },
+        })
+
+        // 逐项恢复库存
+        for (const item of updated.items) {
+          await tx.product.update({
+            where: { id: item.productId },
+            data: { stock: { increment: item.quantity } },
+          })
+        }
+
+        return updated
+      })
+
+      res.json(order)
       return
     }
 

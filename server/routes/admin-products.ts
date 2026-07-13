@@ -1,9 +1,10 @@
 import { Router, Request, Response } from 'express'
-import { requireAdmin } from '../middleware/admin'
+import { requireAdmin, requirePermission } from '../middleware/admin'
 import { prisma } from '../prisma'
 
 const router = Router()
 router.use(requireAdmin)
+router.use(requirePermission('manage_products'))
 
 // GET /api/admin/products - 商品列表
 router.get('/', async (_req: Request, res: Response) => {

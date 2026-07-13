@@ -37,6 +37,11 @@ export const useCartStore = defineStore('cart', () => {
   /** 加入购物车 */
   async function add(params: AddCartParams) {
     const res = await addToCart(params)
+    // 校验响应数据完整性
+    if (!res.data?.id) {
+      await fetchCart()
+      return
+    }
     // 如果是 upsert，更新本地列表
     const idx = items.value.findIndex((item) => item.id === res.data.id)
     if (idx >= 0) {
@@ -50,7 +55,8 @@ export const useCartStore = defineStore('cart', () => {
   /** 修改数量 */
   async function updateQuantity(id: number, params: UpdateCartParams) {
     if (params.quantity === 0) {
-      const backup = items.value
+      // 深拷贝备份，防止并发 fetchCart 后恢复时覆盖服务器最新数据
+      const backup = items.value.map((item) => ({ ...item }))
       items.value = items.value.filter((item) => item.id !== id)
       try {
         await removeCartItem(id)
@@ -69,7 +75,8 @@ export const useCartStore = defineStore('cart', () => {
 
   /** 删除购物车项 */
   async function remove(id: number) {
-    const backup = items.value
+    // 深拷贝备份，防止并发 fetchCart 后恢复时覆盖服务器最新数据
+    const backup = items.value.map((item) => ({ ...item }))
     items.value = items.value.filter((item) => item.id !== id)
     try {
       await removeCartItem(id)

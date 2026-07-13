@@ -15,6 +15,10 @@
       stripe
       v-loading="loading"
     >
+      <template #empty>
+        <span v-if="error">加载失败，请刷新重试</span>
+        <span v-else>暂无分类</span>
+      </template>
       <el-table-column
         prop="id"
         label="ID"
@@ -82,6 +86,7 @@ import { useDeleteConfirm } from '@/hooks/useDeleteConfirm'
 const { confirm: confirmDelete } = useDeleteConfirm()
 const categories = ref<any[]>([])
 let loading = ref(false)
+let error = ref(false)
 let dialogVisible = ref(false)
 let submitting = ref(false)
 let newName = ref('')
@@ -94,10 +99,12 @@ onMounted(() => {
 /** 加载分类列表 */
 async function loadCategories() {
   loading.value = true
+  error.value = false
   try {
     const res = await getAdminCategories()
     categories.value = res.data || []
   } catch (e) {
+    error.value = true
     console.error('加载分类失败:', e)
   } finally {
     loading.value = false

@@ -6,7 +6,7 @@ export function useDeleteConfirm() {
   async function confirm(options: {
     message: string
     title?: string
-    onDelete: () => Promise<void>
+    onDelete: () => Promise<any>
     onSuccess?: () => void
   }): Promise<void> {
     try {

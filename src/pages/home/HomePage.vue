@@ -122,7 +122,7 @@ function initFromQuery() {
 async function loadCategories() {
   try {
     const res = await getCategories()
-    categories.value = res.data
+    categories.value = res.data || []
   } catch (e) {
     console.error('加载分类失败:', e)
   }

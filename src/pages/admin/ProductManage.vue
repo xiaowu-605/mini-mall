@@ -5,7 +5,7 @@
       <el-button type="primary" @click="openDialog(null)">新增商品</el-button>
     </div>
 
-    <el-table :data="products" border stripe v-loading="loading">
+    <el-table :data="products" :border="true" stripe v-loading="loading">
       <el-table-column prop="id" label="ID" width="60" />
       <el-table-column prop="name" label="名称" min-width="150" />
       <el-table-column label="分类" width="100">

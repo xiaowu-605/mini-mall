@@ -52,7 +52,7 @@ async function loadCategories() {
   loading.value = true
   try {
     const res = await getAdminCategories()
-    categories.value = res.data
+    categories.value = res.data || []
   } catch (e) {
     console.error('加载分类失败:', e)
   } finally {

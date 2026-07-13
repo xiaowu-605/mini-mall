@@ -108,7 +108,7 @@ async function loadOrder() {
       return
     }
     const res = await getOrderById(id)
-    order.value = res.data
+    order.value = res.data || null
   } catch (e: any) {
     console.error('加载订单失败:', e)
     if (e.response?.status === 404) {
@@ -125,7 +125,7 @@ async function doPay() {
   try {
     const payParams = { action: 'pay' as const }
     const res = await updateOrder(order.value.id, payParams)
-    order.value = res.data
+    order.value = res.data || null
     ElMessage.success('支付成功')
     // 刷新购物车（因为清空了）
     cart.fetchCart()

@@ -104,7 +104,7 @@ async function loadProduct() {
       return
     }
     const res = await getProductById(id)
-    product.value = res.data
+    product.value = res.data || null
   } catch (e: any) {
     console.error('加载商品详情失败:', e)
     if (e.response?.status === 404) {

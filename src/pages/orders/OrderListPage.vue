@@ -69,7 +69,6 @@ async function loadOrders() {
 
 <style lang="less" scoped>
 .order-list {
-  min-height: 100vh;
   background: @color-bg;
 
   &__container {

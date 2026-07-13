@@ -150,7 +150,6 @@ async function doCancel() {
 
 <style lang="less" scoped>
 .order-detail {
-  min-height: 100vh;
   background: @color-bg;
 
   &__container {

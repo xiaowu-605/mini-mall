@@ -137,7 +137,6 @@ async function addToCart() {
 
 <style lang="less" scoped>
 .product-detail {
-  min-height: 100vh;
   background: @color-bg;
 
   &__container {

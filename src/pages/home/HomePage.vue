@@ -193,7 +193,6 @@ function updateURL() {
 
 <style lang="less" scoped>
 .home-page {
-  min-height: 100vh;
   background: @color-bg;
 
   &__header {

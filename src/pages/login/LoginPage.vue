@@ -86,7 +86,7 @@ async function onSubmit() {
 
 <style lang="less" scoped>
 .auth-page {
-  min-height: 100vh;
+  min-height: calc(100vh - 56px);
   display: flex;
   align-items: center;
   justify-content: center;

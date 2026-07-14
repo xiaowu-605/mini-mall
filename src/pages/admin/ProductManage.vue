@@ -25,6 +25,26 @@
         width="60"
       />
       <el-table-column
+        label="图片"
+        width="80"
+      >
+        <template #default="{ row }">
+          <el-image
+            v-if="row.image"
+            :src="row.image"
+            :preview-src-list="[row.image]"
+            fit="cover"
+            preview-teleported
+            style="width: 60px; height: 60px; border-radius: 4px"
+          />
+          <span
+            v-else
+            class="admin-page__no-image"
+            >-</span
+          >
+        </template>
+      </el-table-column>
+      <el-table-column
         prop="name"
         label="名称"
         min-width="150"
@@ -64,6 +84,20 @@
         </template>
       </el-table-column>
     </el-table>
+
+    <!-- 分页 -->
+    <div class="admin-page__pagination">
+      <el-pagination
+        v-model:current-page="page"
+        v-model:page-size="pageSize"
+        :total="total"
+        :page-sizes="[10, 20, 50]"
+        layout="total, sizes, prev, pager, next, jumper"
+        background
+        @current-change="loadData"
+        @size-change="onPageSizeChange"
+      />
+    </div>
 
     <!-- 新增/编辑弹窗 -->
     <el-dialog
@@ -178,6 +212,11 @@ let dialogVisible = ref(false)
 let submitting = ref(false)
 const editingProduct = ref<Product | null>(null)
 
+/** 分页状态 */
+const page = ref(1)
+const pageSize = ref(10)
+const total = ref(0)
+
 const { confirm: confirmDelete } = useDeleteConfirm()
 
 // 商品编辑表单：名称/分类/价格/库存/描述/图片
@@ -227,10 +266,11 @@ async function loadData() {
   error.value = false
   try {
     const [pRes, cRes] = await Promise.all([
-      getAdminProducts(),
+      getAdminProducts({ page: page.value, pageSize: pageSize.value }),
       getAdminCategories(),
     ])
-    products.value = pRes.data
+    products.value = pRes.data.list
+    total.value = pRes.data.total
     categories.value = cRes.data
   } catch (e) {
     error.value = true
@@ -238,6 +278,12 @@ async function loadData() {
   } finally {
     loading.value = false
   }
+}
+
+/** pageSize 变更时重置到第一页 */
+function onPageSizeChange() {
+  page.value = 1
+  loadData()
 }
 
 /** 保存商品 */
@@ -317,6 +363,17 @@ function onUploadError() {
       font-weight: 600;
       color: @color-text;
     }
+  }
+
+  &__no-image {
+    color: @color-text-secondary;
+    font-size: 13px;
+  }
+
+  &__pagination {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: @spacing-md;
   }
 
   &__upload {

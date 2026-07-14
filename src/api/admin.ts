@@ -1,9 +1,23 @@
 import api from './index'
 import type { Product, Order } from '@/types'
 
+/** 分页查询参数 */
+interface PaginationParams {
+  page: number
+  pageSize: number
+}
+
+/** 分页查询结果 */
+interface PaginatedResponse<T> {
+  list: T[]
+  total: number
+  page: number
+  pageSize: number
+}
+
 // ---- 商品管理 ----
-export function getAdminProducts() {
-  return api.get<Product[]>('/admin/products')
+export function getAdminProducts(params: PaginationParams) {
+  return api.get<PaginatedResponse<Product>>('/admin/products', { params })
 }
 
 export function createAdminProduct(data: any) {

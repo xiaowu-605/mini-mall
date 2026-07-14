@@ -6,14 +6,27 @@ const router = Router()
 router.use(requireAdmin)
 router.use(requirePermission('manage_products'))
 
-// GET /api/admin/products - 商品列表
-router.get('/', async (_req: Request, res: Response) => {
+// GET /api/admin/products - 商品列表（分页）
+router.get('/', async (req: Request, res: Response) => {
   try {
-    const products = await prisma.product.findMany({
-      include: { category: true },
-      orderBy: { createdAt: 'desc' },
-    })
-    res.json(products)
+    const page = Math.max(1, parseInt(req.query.page as string) || 1)
+    const pageSize = Math.min(
+      100,
+      Math.max(1, parseInt(req.query.pageSize as string) || 10),
+    )
+    const skip = (page - 1) * pageSize
+
+    const [list, total] = await Promise.all([
+      prisma.product.findMany({
+        include: { category: true },
+        orderBy: { createdAt: 'desc' },
+        skip,
+        take: pageSize,
+      }),
+      prisma.product.count(),
+    ])
+
+    res.json({ list, total, page, pageSize })
   } catch (error) {
     console.error('获取商品列表失败:', error)
     res.status(500).json({ error: '获取商品列表失败' })

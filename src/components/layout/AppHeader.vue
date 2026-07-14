@@ -102,7 +102,7 @@ watch(
 /** 处理下拉菜单命令 */
 function onCommand(cmd: string) {
   if (cmd === 'admin') {
-    router.push('/admin')
+    window.open('/admin', '_blank')
   } else if (cmd === 'logout') {
     auth.logout()
     ElMessage.success('已退出登录')

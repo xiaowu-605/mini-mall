@@ -2,6 +2,7 @@
 node_modules/
 vendor/
 package-lock.json
+docs
 
 # Build output
 dist/

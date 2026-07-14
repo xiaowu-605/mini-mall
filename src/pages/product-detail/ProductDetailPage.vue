@@ -100,16 +100,36 @@
             </div>
           </div>
         </div>
+
+        <!-- 猜你喜欢 -->
+        <div
+          v-if="recommendedProducts.length > 0"
+          class="product-detail__recommend"
+        >
+          <h2 class="product-detail__recommend-title">猜你喜欢</h2>
+          <div
+            v-loading="loadingRecommendations"
+            class="product-detail__recommend-grid"
+          >
+            <ProductCard
+              v-for="item in recommendedProducts"
+              :key="item.id"
+              :product="item"
+              replace
+            />
+          </div>
+        </div>
       </template>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { getProductById } from '@/api/products'
+import { getProductById, getProducts } from '@/api/products'
+import ProductCard from '@/components/product/ProductCard.vue'
 import { useAuthStore } from '@/stores/auth'
 import { useCartStore } from '@/stores/cart'
 import type { Product } from '@/types'
@@ -122,6 +142,8 @@ const product = ref<Product | null>(null)
 let loading = ref(true)
 let notFound = ref(false)
 let quantity = ref(1)
+let recommendedProducts = ref<Product[]>([])
+let loadingRecommendations = ref(false)
 /** 返回首页：有历史记录则后退（恢复滚动位置），否则跳转首页 */
 function goBack() {
   if (window.history.length > 1) {
@@ -131,10 +153,15 @@ function goBack() {
   }
 }
 
-/** 页面初始化：加载商品详情 */
-onMounted(() => {
-  loadProduct()
-})
+/** 路由参数变化时重新加载商品详情 */
+watch(
+  () => route.params.id,
+  () => {
+    window.scrollTo(0, 0)
+    loadProduct()
+  },
+  { immediate: true },
+)
 
 /** 加载商品详情 */
 async function loadProduct() {
@@ -148,6 +175,7 @@ async function loadProduct() {
     }
     const res = await getProductById(id)
     product.value = res.data || null
+    if (product.value) fetchRecommendations()
   } catch (e: any) {
     console.error('加载商品详情失败:', e)
     if (e.response?.status === 404) {
@@ -155,6 +183,55 @@ async function loadProduct() {
     }
   } finally {
     loading.value = false
+  }
+}
+
+/** 获取猜你喜欢推荐商品 */
+async function fetchRecommendations() {
+  if (!product.value) return
+  loadingRecommendations.value = true
+  try {
+    const fetchedIds = new Set<number>([product.value.id])
+    const results: Product[] = []
+
+    // 第一步：同分类商品
+    if (product.value.categoryId) {
+      const res = await getProducts({
+        categoryId: product.value.categoryId,
+        pageSize: 8,
+      })
+      const items = (res.data?.data || []).filter(
+        (p: Product) => !fetchedIds.has(p.id),
+      )
+      for (const item of items) {
+        if (results.length >= 8) break
+        fetchedIds.add(item.id)
+        results.push(item)
+      }
+    }
+
+    // 第二步：不足 8 个，用全站商品补齐
+    if (results.length < 8) {
+      const shortage = 8 - results.length
+      // 随机取一页增加变化
+      const randomPage = Math.floor(Math.random() * 5) + 1
+      const res = await getProducts({ pageSize: shortage, page: randomPage })
+      const items = (res.data?.data || []).filter(
+        (p: Product) => !fetchedIds.has(p.id),
+      )
+      for (const item of items) {
+        if (results.length >= 8) break
+        fetchedIds.add(item.id)
+        results.push(item)
+      }
+    }
+
+    recommendedProducts.value = results
+  } catch (e) {
+    console.error('获取推荐商品失败:', e)
+    // 静默处理，不影响主内容
+  } finally {
+    loadingRecommendations.value = false
   }
 }
 
@@ -323,6 +400,28 @@ async function addToCart() {
 
   &__add-btn {
     flex: 1;
+  }
+
+  &__recommend {
+    margin-top: @spacing-xl;
+  }
+
+  &__recommend-title {
+    font-size: 20px;
+    font-weight: 600;
+    color: @color-text;
+    margin: 0 0 @spacing-md;
+  }
+
+  &__recommend-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: @spacing-md;
+    min-height: 120px;
+
+    @media (max-width: @screen-md) {
+      grid-template-columns: repeat(2, 1fr);
+    }
   }
 }
 </style>

@@ -1,6 +1,7 @@
 <template>
   <router-link
     :to="`/products/${product.id}`"
+    :replace="replace"
     class="product-card"
   >
     <el-card
@@ -43,6 +44,7 @@ import type { Product } from '@/types'
 
 defineProps<{
   product: Product
+  replace?: boolean
 }>()
 </script>
 

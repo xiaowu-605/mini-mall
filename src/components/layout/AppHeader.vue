@@ -55,17 +55,12 @@
             </span>
             <template #dropdown>
               <el-dropdown-menu>
-                <el-dropdown-item command="orders">我的订单</el-dropdown-item>
                 <el-dropdown-item
                   v-if="auth.isAdmin"
                   command="admin"
                   >后台管理</el-dropdown-item
                 >
-                <el-dropdown-item
-                  divided
-                  command="logout"
-                  >退出登录</el-dropdown-item
-                >
+                <el-dropdown-item command="logout">退出登录</el-dropdown-item>
               </el-dropdown-menu>
             </template>
           </el-dropdown>
@@ -106,9 +101,7 @@ watch(
 
 /** 处理下拉菜单命令 */
 function onCommand(cmd: string) {
-  if (cmd === 'orders') {
-    router.push('/orders')
-  } else if (cmd === 'admin') {
+  if (cmd === 'admin') {
     router.push('/admin')
   } else if (cmd === 'logout') {
     auth.logout()

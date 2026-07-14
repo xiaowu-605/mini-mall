@@ -26,8 +26,8 @@ export function deleteAdminProduct(id: number) {
 }
 
 // ---- 订单管理 ----
-export function getAdminOrders() {
-  return api.get<Order[]>('/admin/orders')
+export function getAdminOrders(params?: Record<string, string | number>) {
+  return api.get<Order[]>('/admin/orders', { params })
 }
 
 export function updateAdminOrderStatus(id: number, status: string) {

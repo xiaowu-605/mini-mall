@@ -4,11 +4,71 @@
       <h2>订单管理</h2>
     </div>
 
+    <!-- 筛选栏 -->
+    <div class="admin-page__filters">
+      <el-input
+        v-model="searchQuery"
+        placeholder="订单号 / 用户名..."
+        clearable
+        style="width: 200px"
+        @input="onSearch"
+        @clear="onSearch"
+      />
+      <el-select
+        v-model="filterStatus"
+        placeholder="全部状态"
+        clearable
+        style="width: 130px"
+        @change="onFilterChange"
+      >
+        <el-option
+          label="待付款"
+          value="pending"
+        />
+        <el-option
+          label="已支付"
+          value="paid"
+        />
+        <el-option
+          label="已发货"
+          value="shipped"
+        />
+        <el-option
+          label="已完成"
+          value="completed"
+        />
+        <el-option
+          label="已取消"
+          value="cancelled"
+        />
+      </el-select>
+      <div class="admin-page__date-picker">
+        <el-date-picker
+          v-model="dateRange"
+          type="daterange"
+          range-separator="至"
+          start-placeholder="开始日期"
+          end-placeholder="结束日期"
+          format="YYYY-MM-DD"
+          value-format="YYYY-MM-DD"
+          @change="onFilterChange"
+        />
+      </div>
+      <el-button
+        type="primary"
+        @click="onFilterChange"
+      >
+        查询
+      </el-button>
+    </div>
+
     <el-table
       :data="orders"
       border
       stripe
       v-loading="loading"
+      show-summary
+      :summary-method="getSummary"
     >
       <template #empty>
         <span v-if="error">加载失败，请刷新重试</span>
@@ -26,10 +86,13 @@
         <template #default="{ row }">{{ row.user?.name }}</template>
       </el-table-column>
       <el-table-column
+        prop="discountedTotal"
         label="金额"
         width="100"
       >
-        <template #default="{ row }">¥{{ row.discountedTotal }}</template>
+        <template #default="{ row }"
+          >¥{{ row.discountedTotal.toFixed(2) }}</template
+        >
       </el-table-column>
       <el-table-column
         label="状态"
@@ -99,20 +162,70 @@ import { getAdminOrders, updateAdminOrderStatus } from '@/api/admin'
 import { statusLabel, statusType } from '@/utils/order'
 import { formatTime } from '@/utils/format'
 import { useAsyncData } from '@/hooks/useAsyncData'
+import { createDebounce } from '@/utils/debounce'
 import type { Order } from '@/types'
 
 const orders = ref<Order[]>([])
 const { loading, error, run } = useAsyncData()
+
+/** 筛选状态 */
+let searchQuery = ref('')
+let filterStatus = ref('')
+let dateRange = ref<[string, string] | null>(null)
+
+const debounce = createDebounce(300)
 
 /** 页面初始化：加载订单列表 */
 onMounted(() => {
   loadOrders()
 })
 
+/** 构建订单查询参数 */
+function buildQueryParams(): Record<string, string | number> {
+  const queryParams: Record<string, string | number> = {}
+  if (searchQuery.value) queryParams.search = searchQuery.value
+  if (filterStatus.value) queryParams.status = filterStatus.value
+  if (dateRange.value) {
+    queryParams.startDate = dateRange.value[0]
+    queryParams.endDate = dateRange.value[1]
+  }
+  return queryParams
+}
+
 /** 加载订单列表 */
 async function loadOrders() {
-  const res = await run(() => getAdminOrders())
+  const queryParams = buildQueryParams()
+  const queryStr = Object.keys(queryParams).length > 0 ? queryParams : undefined
+  const res = await run(() => getAdminOrders(queryStr))
   if (res) orders.value = res.data
+}
+
+/** 搜索防抖处理 */
+function onSearch() {
+  debounce(() => {
+    loadOrders()
+  })
+}
+
+/** 筛选条件变更时重新加载 */
+function onFilterChange() {
+  loadOrders()
+}
+
+/** 表格合计行：汇总订单数和折后总金额 */
+function getSummary({ columns, data }: { columns: any[]; data: Order[] }) {
+  const sums: string[] = []
+  columns.forEach((col, index) => {
+    if (index === 0) {
+      sums[index] = `共 ${data.length} 笔`
+    } else if (col.property === 'discountedTotal') {
+      const total = data.reduce((sum, row) => sum + row.discountedTotal, 0)
+      sums[index] = `¥${total.toFixed(2)}`
+    } else {
+      sums[index] = ''
+    }
+  })
+  return sums
 }
 
 /** 更新订单状态 */
@@ -139,6 +252,26 @@ async function doChangeStatus(orderId: number, status: string) {
       font-weight: 600;
       color: @color-text;
     }
+  }
+
+  &__filters {
+    display: flex;
+    align-items: center;
+    gap: @spacing-sm;
+    margin-bottom: @spacing-md;
+    flex-wrap: wrap;
+  }
+}
+</style>
+
+<style lang="less">
+/* 订单管理-日期范围选择器宽度覆写 */
+.admin-page__date-picker {
+  width: 240px;
+  flex-shrink: 0;
+
+  .el-date-editor {
+    width: 100% !important;
   }
 }
 </style>

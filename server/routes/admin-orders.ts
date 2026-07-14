@@ -20,10 +20,47 @@ function isValidTransition(from: string, to: string): boolean {
   return VALID_TRANSITIONS[from]?.includes(to) ?? false
 }
 
-// GET /api/admin/orders - 所有订单列表
-router.get('/', async (_req: Request, res: Response) => {
+// GET /api/admin/orders - 订单列表（搜索 + 筛选）
+router.get('/', async (req: Request, res: Response) => {
   try {
+    const { search, status, startDate, endDate } = req.query
+
+    // 构建筛选条件
+    const where: any = {}
+
+    // 按订单号精确匹配 或 用户名模糊搜索
+    if (search) {
+      const searchStr = search as string
+      const orderId = parseInt(searchStr)
+      if (!Number.isNaN(orderId)) {
+        where.id = orderId
+      } else {
+        // 非数字则按用户名搜索
+        where.user = { name: { contains: searchStr } }
+      }
+    }
+
+    // 按订单状态筛选
+    if (status) {
+      where.status = status as string
+    }
+
+    // 按时间范围筛选
+    if (startDate || endDate) {
+      where.createdAt = {}
+      if (startDate) {
+        where.createdAt.gte = new Date(startDate as string)
+      }
+      if (endDate) {
+        // 结束日期包含当天全天
+        const end = new Date(endDate as string)
+        end.setHours(23, 59, 59, 999)
+        where.createdAt.lte = end
+      }
+    }
+
     const orders = await prisma.order.findMany({
+      where,
       include: {
         user: { select: { id: true, name: true, email: true } },
         items: { include: { product: true } },

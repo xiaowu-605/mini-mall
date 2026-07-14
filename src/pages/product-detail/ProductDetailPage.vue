@@ -95,7 +95,7 @@
                 class="product-detail__add-btn"
                 @click="addToCart"
               >
-                {{ showCartTip ? '已加入购物车 ✓' : '加入购物车' }}
+                加入购物车
               </el-button>
             </div>
           </div>
@@ -106,7 +106,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { getProductById } from '@/api/products'
@@ -122,9 +122,6 @@ const product = ref<Product | null>(null)
 let loading = ref(true)
 let notFound = ref(false)
 let quantity = ref(1)
-let showCartTip = ref(false)
-let tipTimer: ReturnType<typeof setTimeout> | null = null
-
 /** 返回首页：有历史记录则后退（恢复滚动位置），否则跳转首页 */
 function goBack() {
   if (window.history.length > 1) {
@@ -137,11 +134,6 @@ function goBack() {
 /** 页面初始化：加载商品详情 */
 onMounted(() => {
   loadProduct()
-})
-
-/** 清理定时器，防止组件卸载后状态更新 */
-onUnmounted(() => {
-  if (tipTimer) clearTimeout(tipTimer)
 })
 
 /** 加载商品详情 */
@@ -176,12 +168,7 @@ async function addToCart() {
   try {
     const addParams = { productId: product.value.id, quantity: quantity.value }
     await cart.add(addParams)
-    showCartTip.value = true
-    if (tipTimer) clearTimeout(tipTimer)
-    tipTimer = setTimeout(() => {
-      showCartTip.value = false
-      tipTimer = null
-    }, 1500)
+    ElMessage.success('已加入购物车')
   } catch (e) {
     console.error(e)
     // 错误提示已由拦截器统一处理

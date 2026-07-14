@@ -127,7 +127,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, watch, nextTick } from 'vue'
+import { ref, onMounted, onUnmounted, onActivated, watch, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { Search } from '@element-plus/icons-vue'
 import { getProducts } from '@/api/products'
@@ -212,6 +212,12 @@ onMounted(async () => {
 
 onUnmounted(() => {
   window.removeEventListener('scroll', onBackTopScroll)
+})
+
+/** keep-alive 激活时重新校准虚拟滚动位置 */
+onActivated(() => {
+  updateGridTop()
+  nextTick(() => calibrate())
 })
 
 /** 筛选变化时重新加载 */

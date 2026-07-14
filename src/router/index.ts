@@ -2,12 +2,19 @@ import { createRouter, createWebHistory } from 'vue-router'
 
 const router = createRouter({
   history: createWebHistory(),
+  scrollBehavior(_to, _from, savedPosition) {
+    // 浏览器后退/前进时恢复滚动位置，其他情况回到顶部
+    if (savedPosition) {
+      return savedPosition
+    }
+    return { top: 0 }
+  },
   routes: [
     {
       path: '/',
       name: 'home',
       component: () => import('@/pages/home/HomePage.vue'),
-      meta: { guest: true },
+      meta: { guest: true, keepAlive: true },
     },
     {
       path: '/products/:id',

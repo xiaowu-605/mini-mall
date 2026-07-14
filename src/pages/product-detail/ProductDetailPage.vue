@@ -1,12 +1,12 @@
 <template>
   <div class="product-detail">
     <div class="product-detail__container">
-      <router-link
-        to="/"
+      <a
         class="product-detail__back"
+        @click="goBack"
       >
         ← 返回首页
-      </router-link>
+      </a>
 
       <div
         v-if="loading"
@@ -124,6 +124,15 @@ let notFound = ref(false)
 let quantity = ref(1)
 let showCartTip = ref(false)
 let tipTimer: ReturnType<typeof setTimeout> | null = null
+
+/** 返回首页：有历史记录则后退（恢复滚动位置），否则跳转首页 */
+function goBack() {
+  if (window.history.length > 1) {
+    router.back()
+  } else {
+    router.push('/')
+  }
+}
 
 /** 页面初始化：加载商品详情 */
 onMounted(() => {

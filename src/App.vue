@@ -1,6 +1,17 @@
 <template>
   <AppHeader v-if="!isAdminRoute" />
-  <router-view />
+  <router-view v-slot="{ Component, route: currentRoute }">
+    <keep-alive>
+      <component
+        :is="Component"
+        v-if="currentRoute.meta.keepAlive"
+      />
+    </keep-alive>
+    <component
+      :is="Component"
+      v-if="!currentRoute.meta.keepAlive"
+    />
+  </router-view>
 </template>
 
 <script setup lang="ts">

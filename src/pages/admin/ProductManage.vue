@@ -180,7 +180,7 @@
         <el-form-item label="商品图片">
           <div class="admin-page__upload">
             <el-upload
-              action="/api/admin/upload"
+              :action="UPLOAD_URL"
               :show-file-list="false"
               :on-success="onUploadSuccess"
               :on-error="onUploadError"
@@ -231,11 +231,14 @@ import {
   createAdminProduct,
   updateAdminProduct,
   deleteAdminProduct,
+  getAdminCategories,
 } from '@/api/admin'
-import { getAdminCategories } from '@/api/admin'
 import { useDeleteConfirm } from '@/hooks/useDeleteConfirm'
 import { createDebounce } from '@/utils/debounce'
 import type { Product, ProductQueryParams } from '@/types'
+
+/** 图片上传接口地址 */
+const UPLOAD_URL = '/api/admin/upload'
 
 let products = ref<Product[]>([])
 let categories = ref<any[]>([])

@@ -5,8 +5,16 @@
   >
     <h2 class="dashboard__title">仪表盘</h2>
 
+    <div
+      v-if="error"
+      class="dashboard__error"
+    >
+      <el-empty description="加载失败，请刷新重试" />
+    </div>
+
     <!-- 统计卡片 -->
     <el-row
+      v-else
       :gutter="20"
       class="dashboard__row"
     >
@@ -47,11 +55,12 @@ import {
   GoodsFilled,
 } from '@element-plus/icons-vue'
 import { getDashboardStats } from '@/api/admin'
+import { useAsyncData } from '@/hooks/useAsyncData'
 import type { DashboardStats } from '@/types'
 
 const router = useRouter()
+const { loading, error, run } = useAsyncData()
 
-let loading = ref(true)
 let stats = ref<DashboardStats | null>(null)
 
 /** 统计卡片配置：图标 / 显示值 / 标签 / 可选的跳转路由 */
@@ -64,14 +73,8 @@ interface StatCard {
 
 /** 页面初始化：加载统计数据 */
 onMounted(async () => {
-  try {
-    const res = await getDashboardStats()
-    stats.value = res.data
-  } catch (e) {
-    console.error('加载统计数据失败:', e)
-  } finally {
-    loading.value = false
-  }
+  const res = await run(() => getDashboardStats())
+  if (res) stats.value = res.data
 })
 
 /** 根据 stats 数据生成卡片列表 */

@@ -91,7 +91,7 @@
         width="100"
       >
         <template #default="{ row }"
-          >¥{{ row.discountedTotal.toFixed(2) }}</template
+          >¥{{ (row.discountedTotal ?? 0).toFixed(2) }}</template
         >
       </el-table-column>
       <el-table-column

@@ -144,6 +144,8 @@ let notFound = ref(false)
 let quantity = ref(1)
 let recommendedProducts = ref<Product[]>([])
 let loadingRecommendations = ref(false)
+/** 竞态令牌：每次发起推荐请求时自增，回调中比对以丢弃过期结果 */
+let fetchToken = 0
 /** 返回首页：有历史记录则后退（恢复滚动位置），否则跳转首页 */
 function goBack() {
   if (window.history.length > 1) {
@@ -189,17 +191,21 @@ async function loadProduct() {
 /** 获取猜你喜欢推荐商品 */
 async function fetchRecommendations() {
   if (!product.value) return
+  const token = ++fetchToken
   loadingRecommendations.value = true
   try {
-    const fetchedIds = new Set<number>([product.value.id])
+    const currentProductId = product.value.id
+    const currentCategoryId = product.value.categoryId
+    const fetchedIds = new Set<number>([currentProductId])
     const results: Product[] = []
 
     // 第一步：同分类商品
-    if (product.value.categoryId) {
+    if (currentCategoryId) {
       const res = await getProducts({
-        categoryId: product.value.categoryId,
+        categoryId: currentCategoryId,
         pageSize: 8,
       })
+      if (token !== fetchToken) return // 竞态：后续请求已发起，丢弃本次结果
       const items = (res.data?.data || []).filter(
         (p: Product) => !fetchedIds.has(p.id),
       )
@@ -216,6 +222,7 @@ async function fetchRecommendations() {
       // 随机取一页增加变化
       const randomPage = Math.floor(Math.random() * 5) + 1
       const res = await getProducts({ pageSize: shortage, page: randomPage })
+      if (token !== fetchToken) return // 竞态：丢弃本次结果
       const items = (res.data?.data || []).filter(
         (p: Product) => !fetchedIds.has(p.id),
       )
@@ -226,12 +233,14 @@ async function fetchRecommendations() {
       }
     }
 
+    if (token !== fetchToken) return // 竞态：丢弃本次结果
     recommendedProducts.value = results
   } catch (e) {
+    if (token !== fetchToken) return // 竞态：丢弃本次错误
     console.error('获取推荐商品失败:', e)
     // 静默处理，不影响主内容
   } finally {
-    loadingRecommendations.value = false
+    if (token === fetchToken) loadingRecommendations.value = false
   }
 }
 

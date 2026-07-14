@@ -18,12 +18,11 @@ router.get('/', async (req: Request, res: Response) => {
 
     // 构建筛选条件
     const { search, categoryId, stockZero } = req.query
-    const where: any = {}
+    const where: Record<string, unknown> = {}
 
     if (search) {
-      // 转义 SQL LIKE 通配符
-      const escaped = (search as string).replace(/[%_]/g, '\\$&')
-      where.name = { contains: escaped }
+      // Prisma contains 已自动转义 LIKE 通配符，无需手动处理
+      where.name = { contains: search as string }
     }
 
     if (categoryId) {

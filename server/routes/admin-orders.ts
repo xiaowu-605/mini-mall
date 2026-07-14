@@ -26,7 +26,7 @@ router.get('/', async (req: Request, res: Response) => {
     const { search, status, startDate, endDate } = req.query
 
     // 构建筛选条件
-    const where: any = {}
+    const where: Record<string, unknown> = {}
 
     // 按订单号精确匹配 或 用户名模糊搜索
     if (search) {

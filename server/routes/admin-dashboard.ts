@@ -8,9 +8,12 @@ router.use(requireAdmin)
 // GET /api/admin/dashboard - 统计数据概览
 router.get('/', async (_req: Request, res: Response) => {
   try {
-    // 今天 0 点的时间戳
-    const todayStart = new Date()
-    todayStart.setHours(0, 0, 0, 0)
+    // 今天 0 点（UTC+8 北京时间，部署时注意服务器时区设置）
+    const now = new Date()
+    const offsetMs = 8 * 60 * 60 * 1000 // UTC+8
+    const chinaNow = new Date(now.getTime() + offsetMs)
+    chinaNow.setUTCHours(0, 0, 0, 0)
+    const todayStart = new Date(chinaNow.getTime() - offsetMs)
 
     // 并行查询所有统计数据
     const [

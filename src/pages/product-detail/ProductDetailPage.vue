@@ -206,6 +206,7 @@ async function addToCart() {
     font-size: 14px;
     color: @color-text-secondary;
     margin-bottom: @spacing-md;
+    cursor: pointer;
 
     &:hover {
       color: @color-text;

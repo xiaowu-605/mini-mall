@@ -16,6 +16,10 @@
           text-color="#9ca3af"
           active-text-color="#ffffff"
         >
+          <el-menu-item index="/admin/dashboard">
+            <el-icon><DataLine /></el-icon>
+            <span>仪表盘</span>
+          </el-menu-item>
           <el-menu-item index="/admin/products">
             <el-icon><Goods /></el-icon>
             <span>商品管理</span>
@@ -42,7 +46,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { Goods, Tickets, Menu } from '@element-plus/icons-vue'
+import { Goods, Tickets, Menu, DataLine } from '@element-plus/icons-vue'
 import { useAuthStore } from '@/stores/auth'
 
 const route = useRoute()

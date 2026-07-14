@@ -1,23 +1,15 @@
 import api from './index'
-import type { Product, Order } from '@/types'
-
-/** 分页查询参数 */
-interface PaginationParams {
-  page: number
-  pageSize: number
-}
-
-/** 分页查询结果 */
-interface PaginatedResponse<T> {
-  list: T[]
-  total: number
-  page: number
-  pageSize: number
-}
+import type {
+  Product,
+  Order,
+  PaginationParams,
+  PaginatedList,
+  DashboardStats,
+} from '@/types'
 
 // ---- 商品管理 ----
 export function getAdminProducts(params: PaginationParams) {
-  return api.get<PaginatedResponse<Product>>('/admin/products', { params })
+  return api.get<PaginatedList<Product>>('/admin/products', { params })
 }
 
 export function createAdminProduct(data: any) {
@@ -48,6 +40,11 @@ export function uploadImage(file: File) {
   return api.post<{ url: string }>('/admin/upload', formData, {
     headers: { 'Content-Type': 'multipart/form-data' },
   })
+}
+
+// ---- 仪表盘 ----
+export function getDashboardStats() {
+  return api.get<DashboardStats>('/admin/dashboard')
 }
 
 // ---- 分类管理 ----

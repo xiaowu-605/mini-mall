@@ -1,4 +1,10 @@
-/** 分页响应 */
+/** 分页查询参数 */
+export interface PaginationParams {
+  page: number
+  pageSize: number
+}
+
+/** 分页响应（公开 API） */
 export interface PaginatedResponse<T> {
   data: T[]
   total: number

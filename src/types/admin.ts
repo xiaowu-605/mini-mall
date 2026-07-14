@@ -6,6 +6,15 @@ export interface PaginatedList<T> {
   pageSize: number
 }
 
+/** 商品管理查询参数 */
+export interface ProductQueryParams {
+  page: number
+  pageSize: number
+  search?: string
+  categoryId?: number
+  stockZero?: boolean
+}
+
 /** 仪表盘统计数据 */
 export interface DashboardStats {
   totalOrders: number

@@ -6,7 +6,7 @@ const router = Router()
 router.use(requireAdmin)
 router.use(requirePermission('manage_products'))
 
-// GET /api/admin/products - 商品列表（分页）
+// GET /api/admin/products - 商品列表（分页 + 搜索 + 分类筛选 + 零库存筛选）
 router.get('/', async (req: Request, res: Response) => {
   try {
     const page = Math.max(1, parseInt(req.query.page as string) || 1)
@@ -16,14 +16,36 @@ router.get('/', async (req: Request, res: Response) => {
     )
     const skip = (page - 1) * pageSize
 
+    // 构建筛选条件
+    const { search, categoryId, stockZero } = req.query
+    const where: any = {}
+
+    if (search) {
+      // 转义 SQL LIKE 通配符
+      const escaped = (search as string).replace(/[%_]/g, '\\$&')
+      where.name = { contains: escaped }
+    }
+
+    if (categoryId) {
+      const parsed = parseInt(categoryId as string)
+      if (!Number.isNaN(parsed)) {
+        where.categoryId = parsed
+      }
+    }
+
+    if (stockZero === '1' || stockZero === 'true') {
+      where.stock = 0
+    }
+
     const [list, total] = await Promise.all([
       prisma.product.findMany({
+        where,
         include: { category: true },
         orderBy: { createdAt: 'desc' },
         skip,
         take: pageSize,
       }),
-      prisma.product.count(),
+      prisma.product.count({ where }),
     ])
 
     res.json({ list, total, page, pageSize })

@@ -5,10 +5,11 @@ import type {
   PaginationParams,
   PaginatedList,
   DashboardStats,
+  ProductQueryParams,
 } from '@/types'
 
 // ---- 商品管理 ----
-export function getAdminProducts(params: PaginationParams) {
+export function getAdminProducts(params: ProductQueryParams) {
   return api.get<PaginatedList<Product>>('/admin/products', { params })
 }
 

@@ -9,6 +9,38 @@
       >
     </div>
 
+    <!-- 筛选栏 -->
+    <div class="admin-page__filters">
+      <el-input
+        v-model="searchQuery"
+        placeholder="搜索商品名称..."
+        clearable
+        style="width: 220px"
+        @input="onSearch"
+        @clear="onSearch"
+      />
+      <el-select
+        v-model="filterCategoryId"
+        placeholder="全部分类"
+        clearable
+        style="width: 160px"
+        @change="onFilterChange"
+      >
+        <el-option
+          v-for="cat in categories"
+          :key="cat.id"
+          :label="cat.name"
+          :value="cat.id"
+        />
+      </el-select>
+      <el-checkbox
+        v-model="filterZeroStock"
+        @change="onFilterChange"
+      >
+        仅显示库存为 0
+      </el-checkbox>
+    </div>
+
     <el-table
       :data="products"
       :border="true"
@@ -202,7 +234,8 @@ import {
 } from '@/api/admin'
 import { getAdminCategories } from '@/api/admin'
 import { useDeleteConfirm } from '@/hooks/useDeleteConfirm'
-import type { Product } from '@/types'
+import { createDebounce } from '@/utils/debounce'
+import type { Product, ProductQueryParams } from '@/types'
 
 let products = ref<Product[]>([])
 let categories = ref<any[]>([])
@@ -217,6 +250,13 @@ const page = ref(1)
 const pageSize = ref(10)
 const total = ref(0)
 
+/** 筛选状态 */
+let searchQuery = ref('')
+let filterCategoryId = ref<number | null>(null)
+let filterZeroStock = ref(false)
+
+const debounce = createDebounce(300)
+
 const { confirm: confirmDelete } = useDeleteConfirm()
 
 // 商品编辑表单：名称/分类/价格/库存/描述/图片
@@ -229,8 +269,9 @@ const form = reactive({
   categoryId: null as number | null,
 })
 
-/** 页面初始化：加载数据 */
+/** 页面初始化：加载分类和商品 */
 onMounted(() => {
+  loadCategories()
   loadData()
 })
 
@@ -260,18 +301,37 @@ function openDialog(product: Product | null) {
   dialogVisible.value = true
 }
 
-/** 加载商品和分类数据 */
+/** 构建商品查询参数 */
+function buildQueryParams(): ProductQueryParams {
+  const queryParams: ProductQueryParams = {
+    page: page.value,
+    pageSize: pageSize.value,
+  }
+  if (searchQuery.value) queryParams.search = searchQuery.value
+  if (filterCategoryId.value) queryParams.categoryId = filterCategoryId.value
+  if (filterZeroStock.value) queryParams.stockZero = true
+  return queryParams
+}
+
+/** 加载分类列表（仅页面初始化时调用一次） */
+async function loadCategories() {
+  try {
+    const cRes = await getAdminCategories()
+    categories.value = cRes.data
+  } catch (e) {
+    console.error('加载分类失败:', e)
+  }
+}
+
+/** 加载商品数据 */
 async function loadData() {
   loading.value = true
   error.value = false
   try {
-    const [pRes, cRes] = await Promise.all([
-      getAdminProducts({ page: page.value, pageSize: pageSize.value }),
-      getAdminCategories(),
-    ])
+    const productParams = buildQueryParams()
+    const pRes = await getAdminProducts(productParams)
     products.value = pRes.data.list
     total.value = pRes.data.total
-    categories.value = cRes.data
   } catch (e) {
     error.value = true
     console.error('加载数据失败:', e)
@@ -282,6 +342,20 @@ async function loadData() {
 
 /** pageSize 变更时重置到第一页 */
 function onPageSizeChange() {
+  page.value = 1
+  loadData()
+}
+
+/** 搜索防抖处理：重置页码并重新加载 */
+function onSearch() {
+  debounce(() => {
+    page.value = 1
+    loadData()
+  })
+}
+
+/** 分类筛选或零库存筛选变更时重置页码并重新加载 */
+function onFilterChange() {
   page.value = 1
   loadData()
 }
@@ -363,6 +437,13 @@ function onUploadError() {
       font-weight: 600;
       color: @color-text;
     }
+  }
+
+  &__filters {
+    display: flex;
+    align-items: center;
+    gap: @spacing-sm;
+    margin-bottom: @spacing-md;
   }
 
   &__no-image {

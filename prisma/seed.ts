@@ -163,19 +163,29 @@ function productDesc(cat: string, i: number): string {
 async function main() {
   console.log('开始填充种子数据…')
 
-  // 创建管理员
-  const admin = await prisma.user.upsert({
-    where: { email: 'admin@mini-mall.com' },
-    update: {},
-    create: {
-      email: 'admin@mini-mall.com',
-      password: await bcrypt.hash('admin123', 10),
-      name: '管理员',
-      role: 'admin',
-      permissions: JSON.stringify(['super_admin']),
-    },
-  })
-  console.log(`管理员账号: ${admin.email} / admin123`)
+  // 演示账号列表（密码明文仅用于开发环境一键填入）
+  const DEMO_USERS = [
+    { email: 'admin@mini-mall.com', password: 'admin123', name: '管理员', role: 'admin', permissions: JSON.stringify(['super_admin']), memberLevel: 3, totalSpent: 5000 },
+    { email: 'user@mini-mall.com', password: 'user123', name: '普通用户', role: 'user', permissions: JSON.stringify([]), memberLevel: 1, totalSpent: 1500 },
+    { email: 'vip@mini-mall.com', password: 'vip123', name: 'VIP会员', role: 'user', permissions: JSON.stringify([]), memberLevel: 3, totalSpent: 8000 },
+  ]
+
+  for (const u of DEMO_USERS) {
+    const user = await prisma.user.upsert({
+      where: { email: u.email },
+      update: {},
+      create: {
+        email: u.email,
+        password: await bcrypt.hash(u.password, 10),
+        name: u.name,
+        role: u.role,
+        permissions: u.permissions,
+        memberLevel: u.memberLevel,
+        totalSpent: u.totalSpent,
+      },
+    })
+    console.log(`演示账号: ${user.email} / ${u.password} (${u.role})`)
+  }
 
   // 创建分类
   const categoryNames = ['数码产品', '服装鞋帽', '图书音像', '家居生活']

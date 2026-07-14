@@ -30,3 +30,18 @@ export function getMe() {
 export function logout() {
   return api.post('/auth/logout')
 }
+
+/** 获取演示账号列表（开发环境一键填入） */
+export interface DemoAccount {
+  id: number
+  email: string
+  name: string
+  role: string
+  memberLevel: number
+  password: string
+  roleLabel: string
+}
+
+export function getDemoAccounts() {
+  return api.get<DemoAccount[]>('/auth/demo-accounts')
+}

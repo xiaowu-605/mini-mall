@@ -115,6 +115,40 @@ router.get('/me', async (req: Request, res: Response) => {
   }
 })
 
+// GET /api/auth/demo-accounts - 演示账号列表（仅开发环境一键填入）
+router.get('/demo-accounts', async (_req: Request, res: Response) => {
+  try {
+    // 已知演示账号密码映射（与 seed.ts 保持一致）
+    const DEMO_PASSWORDS: Record<string, string> = {
+      'admin@mini-mall.com': 'admin123',
+      'user@mini-mall.com': 'user123',
+      'vip@mini-mall.com': 'vip123',
+    }
+
+    const users = await prisma.user.findMany({
+      where: { email: { in: Object.keys(DEMO_PASSWORDS) } },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        role: true,
+        memberLevel: true,
+      },
+    })
+
+    const accounts = users.map((u) => ({
+      ...u,
+      password: DEMO_PASSWORDS[u.email] || '',
+      roleLabel: u.role === 'admin' ? '管理员' : `会员 Lv.${u.memberLevel}`,
+    }))
+
+    res.json(accounts)
+  } catch (error) {
+    console.error('获取演示账号失败:', error)
+    res.status(500).json({ error: '获取演示账号失败' })
+  }
+})
+
 // POST /api/auth/logout - 退出登录
 router.post('/logout', (_req: Request, res: Response) => {
   clearSession(res)

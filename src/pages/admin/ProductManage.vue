@@ -111,11 +111,36 @@
             type="textarea"
           />
         </el-form-item>
-        <el-form-item label="图片URL">
-          <el-input
-            v-model="form.image"
-            placeholder="可选"
-          />
+        <el-form-item label="商品图片">
+          <div class="admin-page__upload">
+            <el-upload
+              action="/api/admin/upload"
+              :show-file-list="false"
+              :on-success="onUploadSuccess"
+              :on-error="onUploadError"
+              :before-upload="beforeUpload"
+              accept="image/jpeg,image/png,image/gif,image/webp"
+              drag
+            >
+              <img
+                v-if="form.image"
+                :src="form.image"
+                class="admin-page__upload-preview"
+              />
+              <div
+                v-else
+                class="admin-page__upload-placeholder"
+              >
+                <el-icon :size="32"><UploadFilled /></el-icon>
+                <span>点击或拖拽上传图片</span>
+              </div>
+            </el-upload>
+            <el-input
+              v-model="form.image"
+              placeholder="或手动输入图片 URL"
+              clearable
+            />
+          </div>
         </el-form-item>
       </el-form>
       <template #footer>
@@ -134,6 +159,7 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
+import { UploadFilled } from '@element-plus/icons-vue'
 import {
   getAdminProducts,
   createAdminProduct,
@@ -247,6 +273,35 @@ async function doDelete(id: number) {
     onSuccess: loadData,
   })
 }
+
+/** 上传前校验文件类型和大小 */
+function beforeUpload(file: File) {
+  const allowed = ['image/jpeg', 'image/png', 'image/gif', 'image/webp']
+  if (!allowed.includes(file.type)) {
+    ElMessage.error('仅支持 JPEG、PNG、GIF、WebP 格式的图片')
+    return false
+  }
+  if (file.size > 5 * 1024 * 1024) {
+    ElMessage.error('图片大小不能超过 5MB')
+    return false
+  }
+  return true
+}
+
+/** 上传成功回调：将返回的 URL 填入表单 */
+function onUploadSuccess(res: { url: string }) {
+  if (!res?.url) {
+    ElMessage.error('上传返回数据异常')
+    return
+  }
+  form.image = res.url
+  ElMessage.success('图片上传成功')
+}
+
+/** 上传失败回调 */
+function onUploadError() {
+  ElMessage.error('图片上传失败，请重试')
+}
 </script>
 
 <style lang="less" scoped>
@@ -262,6 +317,26 @@ async function doDelete(id: number) {
       font-weight: 600;
       color: @color-text;
     }
+  }
+
+  &__upload {
+    width: 100%;
+  }
+
+  &__upload-preview {
+    max-width: 100%;
+    max-height: 180px;
+    object-fit: contain;
+  }
+
+  &__upload-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: @spacing-sm;
+    color: @color-text-secondary;
+    font-size: 14px;
+    padding: @spacing-md 0;
   }
 }
 </style>

@@ -27,6 +27,15 @@ export function updateAdminOrderStatus(id: number, status: string) {
   return api.put<Order>(`/admin/orders/${id}`, { status })
 }
 
+// ---- 图片上传 ----
+export function uploadImage(file: File) {
+  const formData = new FormData()
+  formData.append('file', file)
+  return api.post<{ url: string }>('/admin/upload', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  })
+}
+
 // ---- 分类管理 ----
 export function getAdminCategories() {
   return api.get<any[]>('/admin/categories')

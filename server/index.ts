@@ -11,6 +11,7 @@ import ordersRouter from './routes/orders'
 import adminProductsRouter from './routes/admin-products'
 import adminOrdersRouter from './routes/admin-orders'
 import adminCategoriesRouter from './routes/admin-categories'
+import adminUploadRouter from './routes/admin-upload'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -22,6 +23,9 @@ app.use(cors())
 app.use(express.json())
 app.use(cookieParser())
 
+// 托管上传文件的 public 目录
+app.use(express.static(path.resolve(__dirname, '../public')))
+
 // 公开 API 路由
 app.use('/api/products', productsRouter)
 app.use('/api/categories', categoriesRouter)
@@ -31,6 +35,7 @@ app.use('/api/orders', ordersRouter)
 app.use('/api/admin/products', adminProductsRouter)
 app.use('/api/admin/orders', adminOrdersRouter)
 app.use('/api/admin/categories', adminCategoriesRouter)
+app.use('/api/admin/upload', adminUploadRouter)
 
 // Production: serve static frontend files
 if (process.env.NODE_ENV === 'production') {

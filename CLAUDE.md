@@ -11,7 +11,11 @@ pnpm dev:server    # 仅后端（watch 模式）
 
 pnpm db:push       # 同步 Prisma schema → SQLite 数据库
 pnpm db:generate   # 重新生成 Prisma Client
+pnpm db:seed       # 填充种子数据（演示账号 + 1000 商品）
 pnpm db:studio     # 打开 Prisma Studio 可视化
+
+pnpm test          # 运行全部 Vitest 测试
+pnpm test:watch    # watch 模式自动重跑
 
 pnpm format        # Prettier 格式化
 pnpm format:check  # Prettier 检查（pre-commit 钩子自动执行）
@@ -26,8 +30,10 @@ pnpm format:check  # Prettier 检查（pre-commit 钩子自动执行）
         |                                        |
   Pinia stores                                   Prisma Client
         |                                        |
-      组件                                       SQLite (prisma/dev.db)
+  组件 + 指令(permission)                       SQLite (prisma/dev.db)
   (scoped Less)                                       |
+        |                                        |
+  __tests__/  Vitest 单元测试
 ```
 
 ### 关键设计决策
@@ -36,18 +42,43 @@ pnpm format:check  # Prettier 检查（pre-commit 钩子自动执行）
 - **开发时代理**：Vite 开发服务器将 `/api/*` 代理到 `localhost:3000`，无需 CORS 配置
 - **生产部署**：`vite build` 输出到 `dist/`，Express 通过 `express.static('dist')` 托管
 - **Less**：样式写在各自 Vue 文件的 `<style lang="less" scoped>` 中，`src/styles/index.less` 仅引入变量和全局重置；`vite.config.ts` 中通过 `additionalData` 自动注入 `variables.less`，所有 scoped 样式块可直接使用全局变量
-- **Element Plus**：按需自动导入，`vite.config.ts` 中配置 `unplugin-vue-components` + `unplugin-auto-import`；组件使用 `el-` 前缀无需手动 import；图标需从 `@element-plus/icons-vue` 显式导入
+- **Element Plus**：按需自动导入，`vite.config.ts` 中配置 `unplugin-vue-components` + `unplugin-auto-import`；组件使用 `el-` 前缀无需手动 import；图标需从 `@element-plus/icons-vue` 显式导入；全局注册 `zhCn` 中文语言包（`App.vue` 中 `el-config-provider`）
+- **ECharts**：按需导入，仅注册 `LineChart / PieChart / BarChart` 三种图表 + `Tooltip / Legend / Grid / Title` 组件 + `CanvasRenderer`，不用的模块不打包
+- **图片上传**：`multer` 处理 multipart/form-data，存储到 `public/uploads/`，Express 以 `express.static('public')` 托管
+- **权限指令 `v-permission`**：`src/directives/permission.ts` 全局注册，基于 `useAuthStore().hasPermission()` 控制元素显隐（`display:none` + `disabled`）
+- **动态路由**：`src/router/index.ts` 中 `DYNAMIC_ROUTES` 数组配置需按权限注入的路由，`beforeEach` 中遍历注入，`hasRoute` 防重复
 
 ### 数据库模型（Prisma + SQLite）
 
 6 个模型：`User`、`Category`、`Product`、`CartItem`、`Order`、`OrderItem`
 
 - `User.role`：`"user"` 或 `"admin"`；`User.permissions`：JSON 数组控制后台细粒度权限（`super_admin`、`manage_products`、`manage_orders`、`manage_categories`、`manage_users`）
+- `User.status`：`"active"`（默认）或 `"blocked"`，拉黑用户禁止下单（`orders.ts` 创建订单时校验）
 - `User.memberLevel`：0-3，按累计消费（`totalSpent`）自动升级，下单时享受对应折扣；`User.totalSpent` 在订单支付成功后累加
 - `CartItem`：`@@unique([userId, productId])`，重复添加同一商品时 upsert 增加数量
 - `Order.total`：商品原价合计；`Order.discount`：会员折扣率（1.0/0.98/0.95/0.9）；`Order.discountedTotal`：折后实付
 - `OrderItem.price`：下单时商品价格快照，避免后续调价影响历史订单
 - 订单状态流转：`pending → paid → shipped → completed`，任意状态可 → `cancelled`
+
+### 后台权限体系
+
+**两层权限模型：**
+
+1. **角色级**（`requireAdmin` 中间件）：仅 `role='admin'` 可访问后台
+2. **功能级**（`requirePermission` 中间件）：读操作所有管理员可见，写操作需对应权限
+
+| 权限 | 说明 |
+|------|------|
+| `super_admin` | 拥有所有权限，可访问管理员管理页面（动态路由注入）|
+| `manage_products` | 商品 CRUD |
+| `manage_orders` | 订单状态变更 |
+| `manage_categories` | 分类 CRUD |
+| `manage_users` | 用户拉黑/解除 |
+
+**前端权限控制：**
+- `v-permission="'manage_products'"` 指令控制按钮显隐
+- 侧边栏 `管理员管理` 菜单项 `v-if="auth.hasPermission('super_admin')"` 仅超级管理员可见
+- 管理员管理路由通过 `DYNAMIC_ROUTES` 配置数组动态注入，无权限用户路由表不存在该路径
 
 ### 会员等级规则
 

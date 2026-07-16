@@ -24,4 +24,7 @@ export interface DashboardStats {
   todayRevenue: number
   totalUsers: number
   totalProducts: number
+  orderTrend: { date: string; count: number }[]
+  categoryDistribution: { name: string; value: number }[]
+  orderStatusDistribution: { status: string; count: number }[]
 }

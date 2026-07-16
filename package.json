@@ -32,6 +32,7 @@
     "bcryptjs": "^2.4.3",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
+    "echarts": "^6.1.0",
     "element-plus": "^2.14.2",
     "express": "^4.21.0",
     "jsonwebtoken": "^9.0.2",

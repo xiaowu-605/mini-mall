@@ -4,6 +4,7 @@
       <h2>商品管理</h2>
       <el-button
         type="primary"
+        v-permission="'manage_products'"
         @click="openDialog(null)"
         >新增商品</el-button
       >
@@ -104,12 +105,14 @@
         <template #default="{ row }">
           <el-button
             size="small"
+            v-permission="'manage_products'"
             @click="openDialog(row)"
             >编辑</el-button
           >
           <el-button
             size="small"
             type="danger"
+            v-permission="'manage_products'"
             @click="doDelete(row.id)"
             >删除</el-button
           >

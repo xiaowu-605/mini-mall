@@ -58,6 +58,31 @@ export function updateUserStatus(id: number, status: 'active' | 'blocked') {
   return api.put<User>(`/admin/users/${id}/status`, { status })
 }
 
+// ---- 管理员管理 ----
+export function getAdminAdmins(params: Record<string, string | number>) {
+  return api.get<PaginatedList<User>>('/admin/admins', { params })
+}
+
+export function createAdminAccount(data: {
+  email: string
+  password: string
+  name: string
+  permissions: string[]
+}) {
+  return api.post<User>('/admin/admins', data)
+}
+
+export function updateAdminAccount(
+  id: number,
+  data: { permissions: string[] },
+) {
+  return api.put<User>(`/admin/admins/${id}`, data)
+}
+
+export function deleteAdminAccount(id: number) {
+  return api.delete(`/admin/admins/${id}`)
+}
+
 // ---- 分类管理 ----
 export function getAdminCategories() {
   return api.get<any[]>('/admin/categories')

@@ -53,15 +53,41 @@
         >
       </p>
 
+      <!-- 管理员快捷登录 -->
+      <div
+        v-if="adminAccounts.length > 0"
+        class="auth-card__demo"
+      >
+        <p class="auth-card__demo-title">管理员快捷登录（点击直接登录）</p>
+        <div class="auth-card__demo-list">
+          <button
+            v-for="account in adminAccounts"
+            :key="account.id"
+            class="auth-card__demo-item"
+            :disabled="quickLoading"
+            @click="quickLogin(account)"
+          >
+            <span class="auth-card__demo-name">{{ account.name }}</span>
+            <span class="auth-card__demo-role">
+              {{
+                account.permissions.includes('super_admin')
+                  ? '超级管理员'
+                  : '普通管理员'
+              }}
+            </span>
+          </button>
+        </div>
+      </div>
+
       <!-- 演示账号一键填入 -->
       <div
-        v-if="demoAccounts.length > 0"
+        v-if="userAccounts.length > 0"
         class="auth-card__demo"
       >
         <p class="auth-card__demo-title">演示账号（点击一键填入）</p>
         <div class="auth-card__demo-list">
           <button
-            v-for="account in demoAccounts"
+            v-for="account in userAccounts"
             :key="account.id"
             class="auth-card__demo-item"
             @click="fillAccount(account)"
@@ -76,7 +102,7 @@
 </template>
 
 <script setup lang="ts">
-import { reactive, ref, onMounted } from 'vue'
+import { reactive, ref, computed, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
@@ -89,7 +115,18 @@ const route = useRoute()
 const authStore = useAuthStore()
 const formRef = ref<FormInstance>()
 let loading = ref(false)
+let quickLoading = ref(false)
 let demoAccounts = ref<DemoAccount[]>([])
+
+/** 管理员账号（role='admin'） */
+const adminAccounts = computed(() =>
+  demoAccounts.value.filter((a) => a.role === 'admin'),
+)
+
+/** 普通用户账号 */
+const userAccounts = computed(() =>
+  demoAccounts.value.filter((a) => a.role !== 'admin'),
+)
 
 // 登录表单：邮箱 + 密码
 const form = reactive({
@@ -127,6 +164,28 @@ function fillAccount(account: DemoAccount) {
   form.password = account.password
 }
 
+/** 管理员快捷登录：直接调用登录接口 */
+async function quickLogin(account: DemoAccount) {
+  quickLoading.value = true
+  try {
+    const loginData = { email: account.email, password: account.password }
+    await login(loginData)
+    await authStore.fetchUser()
+    ElMessage.success(`已以「${account.name}」身份登录`)
+    // 管理员登录后直接跳转后台仪表盘
+    if (authStore.isAdmin) {
+      router.push('/admin/dashboard')
+    } else {
+      const redirect = route.query.redirect as string
+      router.push(redirect || '/')
+    }
+  } catch (e: any) {
+    ElMessage.error(e.response?.data?.error || '登录失败')
+  } finally {
+    quickLoading.value = false
+  }
+}
+
 /** 提交登录 */
 async function onSubmit() {
   const valid = await formRef.value?.validate().catch(() => false)
@@ -137,8 +196,15 @@ async function onSubmit() {
     await login(form)
     await authStore.fetchUser()
     ElMessage.success('登录成功')
+    // 管理员登录后直接跳转后台仪表盘；有 redirect 参数则优先跳 redirect
     const redirect = route.query.redirect as string
-    router.push(redirect || '/')
+    if (redirect) {
+      router.push(redirect)
+    } else if (authStore.isAdmin) {
+      router.push('/admin/dashboard')
+    } else {
+      router.push('/')
+    }
   } catch (e) {
     console.error(e)
     // 错误提示已由拦截器统一处理

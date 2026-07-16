@@ -124,6 +124,7 @@
       >
         <template #default="{ row }">
           <el-select
+            v-permission="'manage_orders'"
             :model-value="row.status"
             size="small"
             @change="(val: string) => doChangeStatus(row.id, val)"

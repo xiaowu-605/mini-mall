@@ -36,6 +36,13 @@
             <el-icon><UserFilled /></el-icon>
             <span>用户管理</span>
           </el-menu-item>
+          <el-menu-item
+            v-if="auth.hasPermission('super_admin')"
+            index="/admin/admins"
+          >
+            <el-icon><Setting /></el-icon>
+            <span>管理员管理</span>
+          </el-menu-item>
         </el-menu>
       </el-aside>
 
@@ -56,6 +63,7 @@ import {
   Menu,
   DataLine,
   UserFilled,
+  Setting,
 } from '@element-plus/icons-vue'
 import { useAuthStore } from '@/stores/auth'
 

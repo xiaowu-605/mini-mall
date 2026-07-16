@@ -51,6 +51,7 @@ const router = createRouter({
     },
     {
       path: '/admin',
+      name: 'admin',
       component: () => import('@/pages/admin/AdminLayout.vue'),
       meta: { requiresAdmin: true },
       children: [
@@ -80,8 +81,12 @@ const router = createRouter({
           name: 'admin-users',
           component: () => import('@/pages/admin/UserManage.vue'),
         },
+        // 后台 404 重定向到仪表盘
+        { path: ':pathMatch(.*)*', redirect: '/admin/dashboard' },
       ],
     },
+    // 前台 404
+    { path: '/:pathMatch(.*)*', redirect: '/', meta: { guest: true } },
   ],
 })
 
@@ -89,6 +94,25 @@ const router = createRouter({
 let initialAuthDone = false
 let hadUser = false
 let fetchFailCount = 0
+
+/**
+ * 动态路由配置
+ * 每项定义：权限要求 + 路由定义（注入到 admin 父路由下）
+ * 新增动态路由只需在此数组中追加即可
+ */
+const DYNAMIC_ROUTES = [
+  {
+    permission: 'super_admin',
+    route: {
+      path: 'admins',
+      name: 'admin-admins',
+      component: () => import('@/pages/admin/AdminManage.vue'),
+    },
+  },
+]
+
+/** 动态路由是否已注入（每次用户登录后重置）*/
+let dynamicRoutesInjected = false
 
 router.beforeEach(async (to, _from, next) => {
   const { useAuthStore } = await import('@/stores/auth')
@@ -107,6 +131,8 @@ router.beforeEach(async (to, _from, next) => {
       // 无论是否曾经登录过，fetch 失败都递增计数，防止无限重试
       fetchFailCount++
     }
+    // 用户变更后重置动态路由，下次重新注入
+    dynamicRoutesInjected = false
   }
 
   // 未登录访问需认证的页面，跳转登录页
@@ -119,6 +145,20 @@ router.beforeEach(async (to, _from, next) => {
     next('/')
     return
   }
+
+  // 按权限动态注入路由
+  if (auth.isAdmin && !dynamicRoutesInjected) {
+    for (const item of DYNAMIC_ROUTES) {
+      if (
+        auth.hasPermission(item.permission) &&
+        !router.hasRoute(item.route.name as string)
+      ) {
+        router.addRoute('admin', item.route)
+      }
+    }
+    dynamicRoutesInjected = true
+  }
+
   next()
 })
 

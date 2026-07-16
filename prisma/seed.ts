@@ -165,7 +165,8 @@ async function main() {
 
   // 演示账号列表（密码明文仅用于开发环境一键填入）
   const DEMO_USERS = [
-    { email: 'admin@mini-mall.com', password: 'admin123', name: '管理员', role: 'admin', permissions: JSON.stringify(['super_admin']), memberLevel: 3, totalSpent: 5000 },
+    { email: 'admin@mini-mall.com', password: 'admin123', name: '超级管理员', role: 'admin', permissions: JSON.stringify(['super_admin']), memberLevel: 3, totalSpent: 5000 },
+    { email: 'admin2@mini-mall.com', password: 'admin123', name: '普通管理员', role: 'admin', permissions: JSON.stringify([]), memberLevel: 0, totalSpent: 0 },
     { email: 'user@mini-mall.com', password: 'user123', name: '普通用户', role: 'user', permissions: JSON.stringify([]), memberLevel: 1, totalSpent: 1500 },
     { email: 'vip@mini-mall.com', password: 'vip123', name: 'VIP会员', role: 'user', permissions: JSON.stringify([]), memberLevel: 3, totalSpent: 8000 },
   ]
@@ -173,7 +174,14 @@ async function main() {
   for (const u of DEMO_USERS) {
     const user = await prisma.user.upsert({
       where: { email: u.email },
-      update: {},
+      update: {
+        password: await bcrypt.hash(u.password, 10),
+        name: u.name,
+        role: u.role,
+        permissions: u.permissions,
+        memberLevel: u.memberLevel,
+        totalSpent: u.totalSpent,
+      },
       create: {
         email: u.email,
         password: await bcrypt.hash(u.password, 10),

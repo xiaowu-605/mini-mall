@@ -94,6 +94,7 @@
             v-if="row.status !== 'blocked'"
             size="small"
             type="danger"
+            v-permission="'manage_users'"
             @click="doToggleStatus(row)"
           >
             拉黑
@@ -102,6 +103,7 @@
             v-else
             size="small"
             type="success"
+            v-permission="'manage_users'"
             @click="doToggleStatus(row)"
           >
             解除

@@ -121,6 +121,7 @@ router.get('/demo-accounts', async (_req: Request, res: Response) => {
     // 已知演示账号密码映射（与 seed.ts 保持一致）
     const DEMO_PASSWORDS: Record<string, string> = {
       'admin@mini-mall.com': 'admin123',
+      'admin2@mini-mall.com': 'admin123',
       'user@mini-mall.com': 'user123',
       'vip@mini-mall.com': 'vip123',
     }
@@ -132,15 +133,25 @@ router.get('/demo-accounts', async (_req: Request, res: Response) => {
         email: true,
         name: true,
         role: true,
+        permissions: true,
         memberLevel: true,
       },
     })
 
-    const accounts = users.map((u) => ({
-      ...u,
-      password: DEMO_PASSWORDS[u.email] || '',
-      roleLabel: u.role === 'admin' ? '管理员' : `会员 Lv.${u.memberLevel}`,
-    }))
+    const accounts = users.map((u) => {
+      let perms: string[] = []
+      try {
+        perms = u.permissions ? JSON.parse(u.permissions) : []
+      } catch {
+        perms = []
+      }
+      return {
+        ...u,
+        permissions: perms,
+        password: DEMO_PASSWORDS[u.email] || '',
+        roleLabel: u.role === 'admin' ? '管理员' : `会员 Lv.${u.memberLevel}`,
+      }
+    })
 
     res.json(accounts)
   } catch (error) {

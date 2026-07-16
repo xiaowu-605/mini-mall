@@ -4,7 +4,6 @@ import { prisma } from '../prisma'
 
 const router = Router()
 router.use(requireAdmin)
-router.use(requirePermission('manage_orders'))
 
 // 合法的状态流转：pending → paid → shipped → completed，任意状态 → cancelled
 const VALID_TRANSITIONS: Record<string, string[]> = {
@@ -84,92 +83,96 @@ router.get('/', async (req: Request, res: Response) => {
 })
 
 // PUT /api/admin/orders/:id - 更新订单状态
-router.put('/:id', async (req: Request, res: Response) => {
-  try {
-    const id = parseInt(req.params.id, 10)
-    if (Number.isNaN(id)) {
-      res.status(400).json({ error: '参数错误' })
-      return
-    }
-
-    const { status } = req.body
-    const validStatuses = [
-      'pending',
-      'paid',
-      'shipped',
-      'completed',
-      'cancelled',
-    ]
-    if (!validStatuses.includes(status)) {
-      res.status(400).json({ error: '无效的状态' })
-      return
-    }
-
-    // 校验状态流转合法性
-    const currentOrder = await prisma.order.findUnique({
-      where: { id },
-      select: { status: true },
-    })
-    if (!currentOrder) {
-      res.status(404).json({ error: '订单不存在' })
-      return
-    }
-    if (!isValidTransition(currentOrder.status, status)) {
-      const labels: Record<string, string> = {
-        pending: '待付款',
-        paid: '已支付',
-        shipped: '已发货',
-        completed: '已完成',
-        cancelled: '已取消',
+router.put(
+  '/:id',
+  requirePermission('manage_orders'),
+  async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id, 10)
+      if (Number.isNaN(id)) {
+        res.status(400).json({ error: '参数错误' })
+        return
       }
-      res.status(400).json({
-        error: `不能将订单从「${labels[currentOrder.status] || currentOrder.status}」改为「${labels[status] || status}」`,
-      })
-      return
-    }
 
-    // 取消订单时恢复库存（事务保证原子性）
-    if (status === 'cancelled') {
-      const order = await prisma.$transaction(async (tx) => {
-        // 先更新状态，防止并发重复恢复库存
-        const updated = await tx.order.update({
-          where: { id },
-          data: { status: 'cancelled' },
-          include: {
-            user: { select: { id: true, name: true, email: true } },
-            items: { include: { product: true } },
-          },
+      const { status } = req.body
+      const validStatuses = [
+        'pending',
+        'paid',
+        'shipped',
+        'completed',
+        'cancelled',
+      ]
+      if (!validStatuses.includes(status)) {
+        res.status(400).json({ error: '无效的状态' })
+        return
+      }
+
+      // 校验状态流转合法性
+      const currentOrder = await prisma.order.findUnique({
+        where: { id },
+        select: { status: true },
+      })
+      if (!currentOrder) {
+        res.status(404).json({ error: '订单不存在' })
+        return
+      }
+      if (!isValidTransition(currentOrder.status, status)) {
+        const labels: Record<string, string> = {
+          pending: '待付款',
+          paid: '已支付',
+          shipped: '已发货',
+          completed: '已完成',
+          cancelled: '已取消',
+        }
+        res.status(400).json({
+          error: `不能将订单从「${labels[currentOrder.status] || currentOrder.status}」改为「${labels[status] || status}」`,
+        })
+        return
+      }
+
+      // 取消订单时恢复库存（事务保证原子性）
+      if (status === 'cancelled') {
+        const order = await prisma.$transaction(async (tx) => {
+          // 先更新状态，防止并发重复恢复库存
+          const updated = await tx.order.update({
+            where: { id },
+            data: { status: 'cancelled' },
+            include: {
+              user: { select: { id: true, name: true, email: true } },
+              items: { include: { product: true } },
+            },
+          })
+
+          // 逐项恢复库存
+          for (const item of updated.items) {
+            await tx.product.update({
+              where: { id: item.productId },
+              data: { stock: { increment: item.quantity } },
+            })
+          }
+
+          return updated
         })
 
-        // 逐项恢复库存
-        for (const item of updated.items) {
-          await tx.product.update({
-            where: { id: item.productId },
-            data: { stock: { increment: item.quantity } },
-          })
-        }
+        res.json(order)
+        return
+      }
 
-        return updated
+      const order = await prisma.order.update({
+        where: { id },
+        data: { status },
+        include: {
+          user: { select: { id: true, name: true, email: true } },
+          items: { include: { product: true } },
+        },
       })
 
       res.json(order)
-      return
+    } catch (error) {
+      console.error('更新订单状态失败:', error)
+      res.status(500).json({ error: '更新订单状态失败' })
     }
-
-    const order = await prisma.order.update({
-      where: { id },
-      data: { status },
-      include: {
-        user: { select: { id: true, name: true, email: true } },
-        items: { include: { product: true } },
-      },
-    })
-
-    res.json(order)
-  } catch (error) {
-    console.error('更新订单状态失败:', error)
-    res.status(500).json({ error: '更新订单状态失败' })
-  }
-})
+  },
+)
 
 export default router

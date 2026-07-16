@@ -4,9 +4,8 @@ import { prisma } from '../prisma'
 
 const router = Router()
 router.use(requireAdmin)
-router.use(requirePermission('manage_categories'))
 
-// GET /api/admin/categories - 分类列表
+// GET /api/admin/categories - 分类列表（所有管理员可查看）
 router.get('/', async (_req: Request, res: Response) => {
   try {
     const categories = await prisma.category.findMany({
@@ -21,37 +20,45 @@ router.get('/', async (_req: Request, res: Response) => {
 })
 
 // POST /api/admin/categories - 新增分类
-router.post('/', async (req: Request, res: Response) => {
-  try {
-    const { name } = req.body
-    if (!name) {
-      res.status(400).json({ error: '请输入分类名称' })
-      return
-    }
+router.post(
+  '/',
+  requirePermission('manage_categories'),
+  async (req: Request, res: Response) => {
+    try {
+      const { name } = req.body
+      if (!name) {
+        res.status(400).json({ error: '请输入分类名称' })
+        return
+      }
 
-    const category = await prisma.category.create({ data: { name } })
-    res.status(201).json(category)
-  } catch (error) {
-    console.error('新增分类失败:', error)
-    res.status(500).json({ error: '新增分类失败' })
-  }
-})
+      const category = await prisma.category.create({ data: { name } })
+      res.status(201).json(category)
+    } catch (error) {
+      console.error('新增分类失败:', error)
+      res.status(500).json({ error: '新增分类失败' })
+    }
+  },
+)
 
 // DELETE /api/admin/categories/:id - 删除分类
-router.delete('/:id', async (req: Request, res: Response) => {
-  try {
-    const id = parseInt(req.params.id, 10)
-    if (Number.isNaN(id)) {
-      res.status(400).json({ error: '参数错误' })
-      return
-    }
+router.delete(
+  '/:id',
+  requirePermission('manage_categories'),
+  async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id, 10)
+      if (Number.isNaN(id)) {
+        res.status(400).json({ error: '参数错误' })
+        return
+      }
 
-    await prisma.category.delete({ where: { id } })
-    res.json({ message: '已删除' })
-  } catch (error) {
-    console.error('删除分类失败:', error)
-    res.status(500).json({ error: '删除分类失败，请确保该分类下无商品' })
-  }
-})
+      await prisma.category.delete({ where: { id } })
+      res.json({ message: '已删除' })
+    } catch (error) {
+      console.error('删除分类失败:', error)
+      res.status(500).json({ error: '删除分类失败，请确保该分类下无商品' })
+    }
+  },
+)
 
 export default router

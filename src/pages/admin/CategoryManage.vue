@@ -4,6 +4,7 @@
       <h2>分类管理</h2>
       <el-button
         type="primary"
+        v-permission="'manage_categories'"
         @click="openAddDialog"
         >新增分类</el-button
       >
@@ -43,6 +44,7 @@
           <el-button
             size="small"
             type="danger"
+            v-permission="'manage_categories'"
             @click="doDelete(row.id, row.name)"
             >删除</el-button
           >

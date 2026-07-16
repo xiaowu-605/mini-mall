@@ -37,6 +37,7 @@ export interface DemoAccount {
   email: string
   name: string
   role: string
+  permissions: string[]
   memberLevel: number
   password: string
   roleLabel: string

@@ -20,10 +20,14 @@ function isValidTransition(from: string, to: string): boolean {
   return VALID_TRANSITIONS[from]?.includes(to) ?? false
 }
 
-// GET /api/admin/orders - 订单列表（搜索 + 筛选）
+// GET /api/admin/orders - 订单列表（搜索 + 筛选 + 分页）
 router.get('/', async (req: Request, res: Response) => {
   try {
-    const { search, status, startDate, endDate } = req.query
+    const { search, status, startDate, endDate, page, pageSize } = req.query
+
+    const pageNum = Math.max(1, parseInt(page as string) || 1)
+    const size = Math.min(100, Math.max(1, parseInt(pageSize as string) || 10))
+    const skip = (pageNum - 1) * size
 
     // 构建筛选条件
     const where: Record<string, unknown> = {}
@@ -59,15 +63,20 @@ router.get('/', async (req: Request, res: Response) => {
       }
     }
 
-    const orders = await prisma.order.findMany({
-      where,
-      include: {
-        user: { select: { id: true, name: true, email: true } },
-        items: { include: { product: true } },
-      },
-      orderBy: { createdAt: 'desc' },
-    })
-    res.json(orders)
+    const [list, total] = await Promise.all([
+      prisma.order.findMany({
+        where,
+        include: {
+          user: { select: { id: true, name: true, email: true } },
+          items: { include: { product: true } },
+        },
+        orderBy: { createdAt: 'desc' },
+        skip,
+        take: size,
+      }),
+      prisma.order.count({ where }),
+    ])
+    res.json({ list, total, page: pageNum, pageSize: size })
   } catch (error) {
     console.error('获取订单列表失败:', error)
     res.status(500).json({ error: '获取订单列表失败' })

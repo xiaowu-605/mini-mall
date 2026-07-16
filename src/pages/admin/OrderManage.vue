@@ -152,6 +152,20 @@
         </template>
       </el-table-column>
     </el-table>
+
+    <!-- 分页 -->
+    <div class="admin-page__pagination">
+      <el-pagination
+        v-model:current-page="page"
+        v-model:page-size="pageSize"
+        :total="total"
+        :page-sizes="[10, 20, 50]"
+        layout="total, sizes, prev, pager, next, jumper"
+        background
+        @current-change="loadOrders"
+        @size-change="onPageSizeChange"
+      />
+    </div>
   </div>
 </template>
 
@@ -168,6 +182,11 @@ import type { Order } from '@/types'
 const orders = ref<Order[]>([])
 const { loading, error, run } = useAsyncData()
 
+/** 分页状态 */
+const page = ref(1)
+const pageSize = ref(10)
+const total = ref(0)
+
 /** 筛选状态 */
 let searchQuery = ref('')
 let filterStatus = ref('')
@@ -182,7 +201,10 @@ onMounted(() => {
 
 /** 构建订单查询参数 */
 function buildQueryParams(): Record<string, string | number> {
-  const queryParams: Record<string, string | number> = {}
+  const queryParams: Record<string, string | number> = {
+    page: page.value,
+    pageSize: pageSize.value,
+  }
   if (searchQuery.value) queryParams.search = searchQuery.value
   if (filterStatus.value) queryParams.status = filterStatus.value
   if (dateRange.value) {
@@ -195,20 +217,30 @@ function buildQueryParams(): Record<string, string | number> {
 /** 加载订单列表 */
 async function loadOrders() {
   const queryParams = buildQueryParams()
-  const queryStr = Object.keys(queryParams).length > 0 ? queryParams : undefined
-  const res = await run(() => getAdminOrders(queryStr))
-  if (res) orders.value = res.data
+  const res = await run(() => getAdminOrders(queryParams))
+  if (res) {
+    orders.value = res.data.list
+    total.value = res.data.total
+  }
 }
 
-/** 搜索防抖处理 */
+/** 搜索防抖处理：重置到第一页并重新加载 */
 function onSearch() {
   debounce(() => {
+    page.value = 1
     loadOrders()
   })
 }
 
-/** 筛选条件变更时重新加载 */
+/** 筛选条件变更时重置到第一页并重新加载 */
 function onFilterChange() {
+  page.value = 1
+  loadOrders()
+}
+
+/** pageSize 变更时重置到第一页 */
+function onPageSizeChange() {
+  page.value = 1
   loadOrders()
 }
 
@@ -260,6 +292,12 @@ async function doChangeStatus(orderId: number, status: string) {
     gap: @spacing-sm;
     margin-bottom: @spacing-md;
     flex-wrap: wrap;
+  }
+
+  &__pagination {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: @spacing-md;
   }
 }
 </style>

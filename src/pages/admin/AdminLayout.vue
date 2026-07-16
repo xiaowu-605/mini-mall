@@ -46,10 +46,43 @@
         </el-menu>
       </el-aside>
 
-      <!-- 主内容区 -->
-      <el-main class="admin-layout__main">
-        <router-view />
-      </el-main>
+      <!-- 右侧区域 -->
+      <el-container>
+        <!-- 顶部栏 -->
+        <el-header class="admin-layout__header">
+          <div class="admin-layout__header-right">
+            <el-icon><User /></el-icon>
+            <span class="admin-layout__user-name">{{ auth.user?.name }}</span>
+            <el-tag
+              v-if="auth.hasPermission('super_admin')"
+              type="danger"
+              size="small"
+            >
+              超级管理员
+            </el-tag>
+            <el-tag
+              v-else
+              type="info"
+              size="small"
+            >
+              管理员
+            </el-tag>
+            <el-button
+              type="danger"
+              size="small"
+              text
+              @click="doLogout"
+            >
+              退出登录
+            </el-button>
+          </div>
+        </el-header>
+
+        <!-- 主内容区 -->
+        <el-main class="admin-layout__main">
+          <router-view />
+        </el-main>
+      </el-container>
     </el-container>
   </div>
 </template>
@@ -64,6 +97,7 @@ import {
   DataLine,
   UserFilled,
   Setting,
+  User,
 } from '@element-plus/icons-vue'
 import { useAuthStore } from '@/stores/auth'
 
@@ -78,6 +112,12 @@ if (!auth.isAdmin) {
 
 /** 当前激活的菜单项 */
 const activeMenu = computed(() => route.path)
+
+/** 退出登录 */
+async function doLogout() {
+  await auth.logout()
+  router.push('/login')
+}
 </script>
 
 <style lang="less" scoped>
@@ -105,6 +145,27 @@ const activeMenu = computed(() => route.path)
       font-weight: 700;
       color: #fff;
     }
+  }
+
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    height: 48px;
+    background: @color-bg-white;
+    border-bottom: 1px solid #e5e7eb;
+    padding: 0 @spacing-lg;
+  }
+
+  &__header-right {
+    display: flex;
+    align-items: center;
+    gap: @spacing-sm;
+  }
+
+  &__user-name {
+    font-size: 14px;
+    color: @color-text;
   }
 
   &__main {

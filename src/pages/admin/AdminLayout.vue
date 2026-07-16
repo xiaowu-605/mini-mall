@@ -32,6 +32,10 @@
             <el-icon><Menu /></el-icon>
             <span>分类管理</span>
           </el-menu-item>
+          <el-menu-item index="/admin/users">
+            <el-icon><UserFilled /></el-icon>
+            <span>用户管理</span>
+          </el-menu-item>
         </el-menu>
       </el-aside>
 
@@ -46,7 +50,13 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { Goods, Tickets, Menu, DataLine } from '@element-plus/icons-vue'
+import {
+  Goods,
+  Tickets,
+  Menu,
+  DataLine,
+  UserFilled,
+} from '@element-plus/icons-vue'
 import { useAuthStore } from '@/stores/auth'
 
 const route = useRoute()

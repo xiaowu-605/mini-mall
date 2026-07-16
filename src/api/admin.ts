@@ -2,7 +2,7 @@ import api from './index'
 import type {
   Product,
   Order,
-  PaginationParams,
+  User,
   PaginatedList,
   DashboardStats,
   ProductQueryParams,
@@ -46,6 +46,16 @@ export function uploadImage(file: File) {
 // ---- 仪表盘 ----
 export function getDashboardStats() {
   return api.get<DashboardStats>('/admin/dashboard')
+}
+
+// ---- 用户管理 ----
+export function getAdminUsers(params: Record<string, string | number>) {
+  return api.get<PaginatedList<User>>('/admin/users', { params })
+}
+
+/** 拉黑/解除拉黑用户 */
+export function updateUserStatus(id: number, status: 'active' | 'blocked') {
+  return api.put<User>(`/admin/users/${id}/status`, { status })
 }
 
 // ---- 分类管理 ----

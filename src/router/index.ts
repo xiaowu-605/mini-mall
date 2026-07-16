@@ -75,6 +75,11 @@ const router = createRouter({
           name: 'admin-categories',
           component: () => import('@/pages/admin/CategoryManage.vue'),
         },
+        {
+          path: 'users',
+          name: 'admin-users',
+          component: () => import('@/pages/admin/UserManage.vue'),
+        },
       ],
     },
   ],

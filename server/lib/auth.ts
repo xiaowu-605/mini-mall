@@ -60,6 +60,7 @@ export async function getCurrentUser(req: Request) {
       name: true,
       role: true,
       permissions: true,
+      status: true,
       memberLevel: true,
       totalSpent: true,
       createdAt: true,

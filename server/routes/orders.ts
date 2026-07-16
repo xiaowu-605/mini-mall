@@ -29,6 +29,12 @@ router.post('/', async (req: Request, res: Response) => {
       return
     }
 
+    // 拉黑用户禁止下单
+    if ((user as any).status === 'blocked') {
+      res.status(403).json({ error: '您的账号已被限制下单，请联系客服' })
+      return
+    }
+
     const { address, phone } = req.body
     if (!address?.trim() || !phone?.trim()) {
       res.status(400).json({ error: '请填写收货地址和联系电话' })

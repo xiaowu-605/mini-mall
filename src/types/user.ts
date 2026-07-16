@@ -4,7 +4,8 @@ export interface User {
   email: string
   name: string
   role: 'user' | 'admin'
-  permissions: string[]
+  permissions?: string[]
+  status?: string
   memberLevel: number
   totalSpent: number
   createdAt: string

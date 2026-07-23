@@ -50,6 +50,11 @@ const router = createRouter({
       component: () => import('@/pages/orders/OrderDetailPage.vue'),
     },
     {
+      path: '/virtualGrid',
+      name: 'virtual-grid',
+      component: () => import('@/pages/virtualGrid/VirtualGrid.vue'),
+    },
+    {
       path: '/admin',
       name: 'admin',
       component: () => import('@/pages/admin/AdminLayout.vue'),
